@@ -1,0 +1,1 @@
+A library that can read .stp/.step files and build a simplified model tree with internal coordinate systems.
