@@ -1,4 +1,5 @@
 ﻿using SimpleStepParser.StepFileRepresentation;
+using SimpleStepParser.StepFileRepresentation.Entities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,9 +25,9 @@ namespace SimpleStepParser.Parser
 
         private static StepRepresentation GetStepRepresentation(string[] stepFile)
         {
-            if (!stepFile[0].ToUpper().Contains("ISO-10303-21;") ||
+            if (!stepFile[0].Contains("ISO-10303-21;") ||
                 !stepFile[stepFile.Length - 1]
-                .ToUpper().Contains("END-ISO-10303-21;"))
+                .Contains("END-ISO-10303-21;"))
             {
                 throw new ArgumentException("This is not a ISO-10303-21 file");
             }
@@ -35,7 +36,7 @@ namespace SimpleStepParser.Parser
             //Skip to header
             for (; i < stepFile.Length; i++)
             {
-                if (stepFile[i].ToUpper().Contains("HEADER;"))
+                if (stepFile[i].Contains("HEADER;"))
                 {
                     i++;
                     break;
@@ -45,7 +46,7 @@ namespace SimpleStepParser.Parser
             StringBuilder header = new();
             for (; i < stepFile.Length; i++)
             {
-                if (stepFile[i].ToUpper().Contains("ENDSEC;"))
+                if (stepFile[i].Contains("ENDSEC;"))
                 {
                     i++;
                     break;
@@ -55,19 +56,19 @@ namespace SimpleStepParser.Parser
             //Skip to data
             for (; i < stepFile.Length; i++)
             {
-                if (stepFile[i].ToUpper().Contains("DATA;"))
+                if (stepFile[i].Contains("DATA;"))
                 {
                     i++;
                     break;
                 }
             }
             //Saving data
-            List<StepEntity> data = new();
+            StepRepresentation stepRepresentation = new() { Header = header.ToString() };
             Regex entityStart = new Regex(@"^#(?<id>\d*)=(?<body>.*)");
             for (; i < stepFile.Length; i++)
             {
                 //if the line is the end of data section
-                if (stepFile[i].ToUpper().Contains("ENDSEC;"))
+                if (stepFile[i].Contains("ENDSEC;"))
                 {
                     break;
                 }
@@ -93,10 +94,49 @@ namespace SimpleStepParser.Parser
                     stepFile[i].Count(x => x == '(') -
                     stepFile[i].Count(x => x == ')');
                 }
-                data.Add(new StepEntity(id, body.ToString()));
+
+                var undefinedStepEntity = 
+                    new UndefinedStepEntity() 
+                    { 
+                        Id = id, 
+                        Body = body.ToString() 
+                    };
+                var stepDirection = TryParseToStepDirection(undefinedStepEntity);
+                if(stepDirection != null)
+                {
+                    stepRepresentation.StepDirections?.Add(stepDirection);
+                }
+                else
+                {
+                    stepRepresentation.UndefinedStepEntities?.Add(undefinedStepEntity);
+                }
             }
 
-            return new StepRepresentation(header.ToString(), data);
+            return stepRepresentation;
         }
+
+
+        private static readonly Regex _stepDirectionRegex
+            = new Regex(@"^DIRECTION\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);");
+
+        private static StepDirection? TryParseToStepDirection(UndefinedStepEntity from)
+        {
+            var match = _stepDirectionRegex.Match(from.Body);
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            StepDirection result = new StepDirection() {
+                Id = from.Id,
+                Name = match.Groups["name"].Value ?? string.Empty,
+                I = float.Parse(match.Groups["i"].Value),
+                J = float.Parse(match.Groups["j"].Value),
+                K = float.Parse(match.Groups["k"].Value),
+            };
+
+            return result;
+        }
+
     }
 }
