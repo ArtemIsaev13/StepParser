@@ -1,20 +1,16 @@
-﻿using SimpleStepParser.StepFileRepresentation;
-using SimpleStepParser.StepFileRepresentation.Entities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using SimpleStepParser.StepFileRepresentation._1.Domain;
+using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
+using SimpleStepParser.StepFileRepresentation._2.Application.Parser;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace SimpleStepParser.Parser
+namespace SimpleStepParser.StepFileRepresentation.Parser
 {
     public static class SimpleStepParser
     {
         public static void ReadStepFile(string path)
         {
-            if(!File.Exists(path))
+            if (!File.Exists(path))
             {
                 throw new FileNotFoundException();
             }
@@ -95,20 +91,47 @@ namespace SimpleStepParser.Parser
                     stepFile[i].Count(x => x == ')');
                 }
 
-                var undefinedStepEntity = 
-                    new UndefinedStepEntity() 
-                    { 
-                        Id = id, 
-                        Body = body.ToString() 
+                var undefinedStepEntity =
+                    new UndefinedStepEntity()
+                    {
+                        Id = id,
+                        Body = body.ToString()
                     };
-                var stepDirection = TryParseToStepDirection(undefinedStepEntity);
-                if(stepDirection != null)
+                AbstractStepEntity? currentEntity = null;
+
+                if (!string.IsNullOrEmpty(undefinedStepEntity.Body))
                 {
-                    stepRepresentation.StepDirections?.Add(stepDirection);
-                }
-                else
-                {
-                    stepRepresentation.UndefinedStepEntities?.Add(undefinedStepEntity);
+                    //Sorted by frequency of occurrence in the common step file
+                    if ((currentEntity = StepEntityParser.TryParseToStepCartesianPoint(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepCartesianPoints?.Add((StepCartesianPoint)currentEntity);
+                    }
+                    else if ((currentEntity = StepEntityParser.TryParseToStepAxis2Placement3D(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepAxis2Placements3D?.Add((StepAxis2Placement3D)currentEntity);
+                    }
+                    else if ((currentEntity = StepEntityParser.TryParseToStepDirection(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepDirections?.Add((StepDirection)currentEntity);
+                    }                    
+                    else if ((currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepItemDefinedTransformations?.Add((StepItemDefinedTransformation)currentEntity);
+                    }                                     
+                    else if ((currentEntity 
+                        = StepEntityParser.TryParseToStepRepresentationRelationshipWithTransformation(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepRepresentationsRelationshipWithTransformation?
+                            .Add((StepRepresentationRelationshipWithTransformation)currentEntity);
+                    }
+                    else if ((currentEntity = StepEntityParser.TryParseToStepShapeRepresentation(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepShapeRepresentations?.Add((StepShapeRepresentation)currentEntity);
+                    }
+                    else
+                    {
+                        stepRepresentation.UndefinedStepEntities?.Add(undefinedStepEntity);
+                    }
                 }
             }
 
@@ -116,27 +139,8 @@ namespace SimpleStepParser.Parser
         }
 
 
-        private static readonly Regex _stepDirectionRegex
-            = new Regex(@"^DIRECTION\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);");
 
-        private static StepDirection? TryParseToStepDirection(UndefinedStepEntity from)
-        {
-            var match = _stepDirectionRegex.Match(from.Body);
-            if (!match.Success)
-            {
-                return null;
-            }
 
-            StepDirection result = new StepDirection() {
-                Id = from.Id,
-                Name = match.Groups["name"].Value ?? string.Empty,
-                I = float.Parse(match.Groups["i"].Value),
-                J = float.Parse(match.Groups["j"].Value),
-                K = float.Parse(match.Groups["k"].Value),
-            };
-
-            return result;
-        }
 
     }
 }
