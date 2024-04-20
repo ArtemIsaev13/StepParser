@@ -11,4 +11,23 @@
     <ProjectReference Include="..\SimpleStepParser\SimpleStepParser.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="StepExamples\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="StepExamples\SiemensNx11_step_ap203.stp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="StepExamples\SiemensNx11_step_ap214.stp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="StepExamples\SiemensNx11_step_ap242.stp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="StepExamples\SiemensNxStep.stp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
