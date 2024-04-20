@@ -113,6 +113,10 @@ namespace SimpleStepParser.StepFileRepresentation.Parser
                     else if ((currentEntity = StepEntityParser.TryParseToStepDirection(undefinedStepEntity)) != null)
                     {
                         stepRepresentation.StepDirections?.Add((StepDirection)currentEntity);
+                    }                    
+                    else if ((currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepItemDefinedTransformations?.Add((StepItemDefinedTransformation)currentEntity);
                     }
                     else
                     {

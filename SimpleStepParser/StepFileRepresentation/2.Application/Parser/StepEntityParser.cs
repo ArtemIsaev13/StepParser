@@ -35,7 +35,7 @@ namespace SimpleStepParser.StepFileRepresentation._2.Application.Parser
 
         private static readonly Regex _stepCartesianPoint
             = new Regex(@"^CARTESIAN_POINT\('(?<name>.*)',\((?<x>\d*.\d*),(?<y>\d*.\d*),(?<z>\d*.\d*)\)\);");
-        //For more information: https://www.steptools.com/docs/stp_aim/html/t_cartesian_point.html
+
         internal static StepCartesianPoint? TryParseToStepCartesianPoint(UndefinedStepEntity from)
         {
             if (from.Body == null)
@@ -63,7 +63,7 @@ namespace SimpleStepParser.StepFileRepresentation._2.Application.Parser
 
         private static readonly Regex _stepAxis2Placement3D
             = new Regex(@"^AXIS2_PLACEMENT_3D\('(?<name>.*)',#(?<point>\d*),#(?<zAxis>\d*),#(?<xAxis>\d*)\);");
-        //For more information^ https://www.steptools.com/stds/stp_aim/html/t_axis2_placement_3d.html
+
         internal static StepAxis2Placement3D? TryParseToStepAxis2Placement3D(UndefinedStepEntity from)
         {
             if (from.Body == null)
@@ -84,6 +84,34 @@ namespace SimpleStepParser.StepFileRepresentation._2.Application.Parser
                 LocationPointId = int.Parse(match.Groups["point"].Value),
                 ZAxisId = int.Parse(match.Groups["zAxis"].Value),
                 XAxisId = int.Parse(match.Groups["xAxis"].Value),
+            };
+
+            return result;
+        }
+
+        private static readonly Regex _stepItemDefinedTransformation
+            = new Regex(@"^ITEM_DEFINED_TRANSFORMATION\('(?<name>.*)','(?<description>.*)',#(?<parent>\d*),#(?<child>\d*)\);");
+
+        internal static StepItemDefinedTransformation? TryParseToStepItemDefinedTransformation(UndefinedStepEntity from)
+        {
+            if (from.Body == null)
+            {
+                return null;
+            }
+
+            var match = _stepItemDefinedTransformation.Match(from.Body);
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            StepItemDefinedTransformation result = new StepItemDefinedTransformation()
+            {
+                Id = from.Id,
+                Name = match.Groups["name"].Value ?? string.Empty,
+                Description = match.Groups["description"].Value ?? string.Empty,
+                ParentId = int.Parse(match.Groups["parent"].Value),
+                ChildId = int.Parse(match.Groups["child"].Value),
             };
 
             return result;
