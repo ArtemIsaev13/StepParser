@@ -27,6 +27,7 @@ internal static class ModelInterpretator
             AddModel(ref models, relationship.ChildId, stepFileRepresentation);
 
             models[relationship.ParentId].Childs.Add(models[relationship.ChildId]);
+            models[relationship.ChildId].Parent = models[relationship.ParentId];
         }
 
         //Root it is parentless model
