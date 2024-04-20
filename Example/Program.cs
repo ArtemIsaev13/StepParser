@@ -12,7 +12,7 @@ int numOfTests = 10;
 stopwatch.Start();
 for (int i = 0; i < numOfTests; i++)
 {
-    SimpleStepParser.Parser.SimpleStepParser.ReadStepFile(SiemensNx11StepAp242);
+    SimpleStepParser.StepFileRepresentation.Parser.SimpleStepParser.ReadStepFile(SiemensNx11StepAp242);
 }
 stopwatch.Stop();
 

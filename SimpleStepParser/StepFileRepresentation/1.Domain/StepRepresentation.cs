@@ -1,6 +1,6 @@
-﻿using SimpleStepParser.StepFileRepresentation.Entities;
+﻿using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
 
-namespace SimpleStepParser.StepFileRepresentation;
+namespace SimpleStepParser.StepFileRepresentation._1.Domain;
 
 internal class StepRepresentation
 {

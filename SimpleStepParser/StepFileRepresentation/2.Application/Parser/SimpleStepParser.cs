@@ -1,20 +1,15 @@
-﻿using SimpleStepParser.StepFileRepresentation;
-using SimpleStepParser.StepFileRepresentation.Entities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using SimpleStepParser.StepFileRepresentation._1.Domain;
+using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace SimpleStepParser.Parser
+namespace SimpleStepParser.StepFileRepresentation.Parser
 {
     public static class SimpleStepParser
     {
         public static void ReadStepFile(string path)
         {
-            if(!File.Exists(path))
+            if (!File.Exists(path))
             {
                 throw new FileNotFoundException();
             }
@@ -95,14 +90,14 @@ namespace SimpleStepParser.Parser
                     stepFile[i].Count(x => x == ')');
                 }
 
-                var undefinedStepEntity = 
-                    new UndefinedStepEntity() 
-                    { 
-                        Id = id, 
-                        Body = body.ToString() 
+                var undefinedStepEntity =
+                    new UndefinedStepEntity()
+                    {
+                        Id = id,
+                        Body = body.ToString()
                     };
                 var stepDirection = TryParseToStepDirection(undefinedStepEntity);
-                if(stepDirection != null)
+                if (stepDirection != null)
                 {
                     stepRepresentation.StepDirections?.Add(stepDirection);
                 }
@@ -127,7 +122,8 @@ namespace SimpleStepParser.Parser
                 return null;
             }
 
-            StepDirection result = new StepDirection() {
+            StepDirection result = new StepDirection()
+            {
                 Id = from.Id,
                 Name = match.Groups["name"].Value ?? string.Empty,
                 I = float.Parse(match.Groups["i"].Value),
@@ -137,6 +133,8 @@ namespace SimpleStepParser.Parser
 
             return result;
         }
+
+
 
     }
 }

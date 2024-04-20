@@ -1,4 +1,4 @@
-﻿namespace SimpleStepParser.StepFileRepresentation.Entities;
+﻿namespace SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
 
 internal class UndefinedStepEntity : AbstractStepEntity
 {
