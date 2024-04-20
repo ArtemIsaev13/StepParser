@@ -10,4 +10,5 @@ internal class StepRepresentation
     internal List<StepCartesianPoint>? StepCartesianPoints { get; } = new List<StepCartesianPoint>();
     internal List<StepAxis2Placement3D>? StepAxis2Placements3D { get; } = new List<StepAxis2Placement3D>();
     internal List<StepItemDefinedTransformation>? StepItemDefinedTransformations { get; } = new List<StepItemDefinedTransformation>();
+    internal List<StepShapeRepresentation>? StepShapeRepresentations { get; } = new List<StepShapeRepresentation>();
 }
