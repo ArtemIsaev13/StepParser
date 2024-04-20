@@ -96,14 +96,23 @@ namespace SimpleStepParser.StepFileRepresentation.Parser
                         Id = id,
                         Body = body.ToString()
                     };
-                var stepDirection = TryParseToStepDirection(undefinedStepEntity);
-                if (stepDirection != null)
+                AbstractStepEntity? currentEntity = null;
+
+                if (!string.IsNullOrEmpty(undefinedStepEntity.Body))
                 {
-                    stepRepresentation.StepDirections?.Add(stepDirection);
-                }
-                else
-                {
-                    stepRepresentation.UndefinedStepEntities?.Add(undefinedStepEntity);
+                    //Sorted by frequency of occurrence in the common step file
+                    if ((currentEntity = TryParseToStepCartesianPoint(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepCartesianPoints?.Add((StepCartesianPoint)currentEntity);
+                    }
+                    else if ((currentEntity = TryParseToStepDirection(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepDirections?.Add((StepDirection)currentEntity);
+                    }
+                    else
+                    {
+                        stepRepresentation.UndefinedStepEntities?.Add(undefinedStepEntity);
+                    }
                 }
             }
 
@@ -112,10 +121,15 @@ namespace SimpleStepParser.StepFileRepresentation.Parser
 
 
         private static readonly Regex _stepDirectionRegex
-            = new Regex(@"^DIRECTION\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);");
+            = new Regex(@"^DIRECTION\('(?<name>.*)',\((?<i>\d*.\d*),(?<j>\d*.\d*),(?<k>\d*.\d*)\)\);");
 
         private static StepDirection? TryParseToStepDirection(UndefinedStepEntity from)
         {
+            if(from.Body == null)
+            {
+                return null;
+            }
+
             var match = _stepDirectionRegex.Match(from.Body);
             if (!match.Success)
             {
@@ -134,7 +148,33 @@ namespace SimpleStepParser.StepFileRepresentation.Parser
             return result;
         }
 
+        private static readonly Regex _stepCartesianPoint
+            = new Regex(@"^CARTESIAN_POINT\('(?<name>.*)',\((?<x>\d*.\d*),(?<y>\d*.\d*),(?<z>\d*.\d*)\)\);");
+        
+        private static StepCartesianPoint? TryParseToStepCartesianPoint(UndefinedStepEntity from)
+        {
+            if (from.Body == null)
+            {
+                return null;
+            }
 
+            var match = _stepCartesianPoint.Match(from.Body);
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            StepCartesianPoint result = new StepCartesianPoint()
+            {
+                Id = from.Id,
+                Name = match.Groups["name"].Value ?? string.Empty,
+                X = float.Parse(match.Groups["x"].Value),
+                Y = float.Parse(match.Groups["y"].Value),
+                Z = float.Parse(match.Groups["z"].Value),
+            };
+
+            return result;
+        }
 
     }
 }
