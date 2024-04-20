@@ -6,7 +6,7 @@ namespace SimpleStepParser.StepFileRepresentation._2.Application.Parser;
 internal static class StepEntityParser
 {
     private static readonly Regex _stepDirectionRegex
-        = new Regex(@"^DIRECTION\('(?<name>.*)',\((?<i>\d*.\d*),(?<j>\d*.\d*),(?<k>\d*.\d*)\)\);");
+        = new Regex(@"^DIRECTION\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);");
 
     internal static StepDirection? TryParseToStepDirection(UndefinedStepEntity from)
     {
@@ -34,7 +34,7 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepCartesianPoint
-        = new Regex(@"^CARTESIAN_POINT\('(?<name>.*)',\((?<x>\d*.\d*),(?<y>\d*.\d*),(?<z>\d*.\d*)\)\);");
+        = new Regex(@"^CARTESIAN_POINT\('(?<name>.*)',\((?<x>.*),(?<y>.*),(?<z>.*)\)\);");
 
     internal static StepCartesianPoint? TryParseToStepCartesianPoint(UndefinedStepEntity from)
     {

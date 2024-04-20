@@ -22,9 +22,11 @@ internal static class ModelInterpretator
             AddModel(ref models, relationship.ParentId, stepFileRepresentation);
             //Creating models for child
             AddModel(ref models, relationship.ChildId, stepFileRepresentation);
-
+            //Adding child to parent
             models[relationship.ParentId].Childs.Add(models[relationship.ChildId]);
+            //Adding parent to child
             models[relationship.ChildId].Parent = models[relationship.ParentId];
+            //Adding CoordinateSystem
             models[relationship.ChildId].CoordinateSystem 
                 = GetCoordinateSystem(relationship.TransformationId, stepFileRepresentation);
         }
@@ -70,8 +72,12 @@ internal static class ModelInterpretator
 
     private static CoordinateSystem? GetCoordinateSystem(int id, StepRepresentation stepFileRepresentation)
     {
+        // Оnly child CS is matter by some reason
+        int currentCsId = 
+            stepFileRepresentation.StepItemDefinedTransformations!.First(s => s.Id == id).ChildId;
+
         StepAxis2Placement3D? currentStepAxis2Placement3D
-            = stepFileRepresentation.StepAxis2Placements3D!.First(s => (s.Id == id));
+            = stepFileRepresentation.StepAxis2Placements3D!.First(s => (s.Id == currentCsId));
 
         if(currentStepAxis2Placement3D == null)
         {
