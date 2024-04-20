@@ -144,4 +144,34 @@ internal static class StepEntityParser
         return result;
     }
 
+    private static readonly Regex _stepRepresentationRelationshipWithTransformation
+        = new Regex(@"^(?s)\(.*REPRESENTATION_RELATIONSHIP\('(?<name>.*)','(?<description>.*)',#(?<parent>\d*),#(?<child>\d*)\).*REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION\(#(?<transformation>\d*)\)");
+
+    internal static StepRepresentationRelationshipWithTransformation? 
+        TryParseToStepRepresentationRelationshipWithTransformation(UndefinedStepEntity from)
+    {
+        if (from.Body == null)
+        {
+            return null;
+        }
+
+        var match = _stepRepresentationRelationshipWithTransformation.Match(from.Body);
+        if (!match.Success)
+        {
+            return null;
+        }
+        
+        StepRepresentationRelationshipWithTransformation result 
+            = new StepRepresentationRelationshipWithTransformation()
+        {
+            Id = from.Id,
+            Name = match.Groups["name"].Value ?? string.Empty,
+            Description = match.Groups["description"].Value ?? string.Empty,
+            ChildId = int.Parse(match.Groups["child"].Value),
+            ParentId = int.Parse(match.Groups["parent"].Value),
+            TransformationId = int.Parse(match.Groups["transformation"].Value)
+
+            };
+        return result;
+    }
 }

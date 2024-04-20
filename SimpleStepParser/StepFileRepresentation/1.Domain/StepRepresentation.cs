@@ -11,4 +11,6 @@ internal class StepRepresentation
     internal List<StepAxis2Placement3D>? StepAxis2Placements3D { get; } = new List<StepAxis2Placement3D>();
     internal List<StepItemDefinedTransformation>? StepItemDefinedTransformations { get; } = new List<StepItemDefinedTransformation>();
     internal List<StepShapeRepresentation>? StepShapeRepresentations { get; } = new List<StepShapeRepresentation>();
+    internal List<StepRepresentationRelationshipWithTransformation>? StepRepresentationsRelationshipWithTransformation { get; } 
+        = new List<StepRepresentationRelationshipWithTransformation>();
 }

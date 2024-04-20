@@ -117,7 +117,13 @@ namespace SimpleStepParser.StepFileRepresentation.Parser
                     else if ((currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(undefinedStepEntity)) != null)
                     {
                         stepRepresentation.StepItemDefinedTransformations?.Add((StepItemDefinedTransformation)currentEntity);
-                    }                    
+                    }                                     
+                    else if ((currentEntity 
+                        = StepEntityParser.TryParseToStepRepresentationRelationshipWithTransformation(undefinedStepEntity)) != null)
+                    {
+                        stepRepresentation.StepRepresentationsRelationshipWithTransformation?
+                            .Add((StepRepresentationRelationshipWithTransformation)currentEntity);
+                    }
                     else if ((currentEntity = StepEntityParser.TryParseToStepShapeRepresentation(undefinedStepEntity)) != null)
                     {
                         stepRepresentation.StepShapeRepresentations?.Add((StepShapeRepresentation)currentEntity);
