@@ -6,16 +6,16 @@ namespace SimpleStepParser.StepFileRepresentation._2.Application.Parser;
 internal static class StepEntityParser
 {
     private static readonly Regex _stepDirectionRegex
-        = new Regex(@"^DIRECTION\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);");
+        = new Regex(@"^\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);");
 
-    internal static StepDirection? TryParseToStepDirection(UndefinedStepEntity from)
+    internal static StepDirection? TryParseToStepDirection(int id, string body)
     {
-        if (from.Body == null)
+        if (body == null)
         {
             return null;
         }
 
-        var match = _stepDirectionRegex.Match(from.Body);
+        var match = _stepDirectionRegex.Match(body);
         if (!match.Success)
         {
             return null;
@@ -23,7 +23,7 @@ internal static class StepEntityParser
 
         StepDirection result = new StepDirection()
         {
-            Id = from.Id,
+            Id = id,
             Name = match.Groups["name"].Value ?? string.Empty,
             I = float.Parse(match.Groups["i"].Value),
             J = float.Parse(match.Groups["j"].Value),
@@ -34,16 +34,16 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepCartesianPoint
-        = new Regex(@"^CARTESIAN_POINT\('(?<name>.*)',\((?<x>.*),(?<y>.*),(?<z>.*)\)\);");
+        = new Regex(@"^\('(?<name>.*)',\((?<x>.*),(?<y>.*),(?<z>.*)\)\);");
 
-    internal static StepCartesianPoint? TryParseToStepCartesianPoint(UndefinedStepEntity from)
+    internal static StepCartesianPoint? TryParseToStepCartesianPoint(int id, string body)
     {
-        if (from.Body == null)
+        if (body == null)
         {
             return null;
         }
 
-        var match = _stepCartesianPoint.Match(from.Body);
+        var match = _stepCartesianPoint.Match(body);
         if (!match.Success)
         {
             return null;
@@ -51,7 +51,7 @@ internal static class StepEntityParser
 
         StepCartesianPoint result = new StepCartesianPoint()
         {
-            Id = from.Id,
+            Id = id,
             Name = match.Groups["name"].Value ?? string.Empty,
             X = float.Parse(match.Groups["x"].Value),
             Y = float.Parse(match.Groups["y"].Value),
@@ -62,16 +62,16 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepAxis2Placement3D
-        = new Regex(@"^AXIS2_PLACEMENT_3D\('(?<name>.*)',#(?<point>\d*),#(?<zAxis>\d*),#(?<xAxis>\d*)\);");
+        = new Regex(@"^\('(?<name>.*)',#(?<point>\d*),#(?<zAxis>\d*),#(?<xAxis>\d*)\);");
 
-    internal static StepAxis2Placement3D? TryParseToStepAxis2Placement3D(UndefinedStepEntity from)
+    internal static StepAxis2Placement3D? TryParseToStepAxis2Placement3D(int id, string body)
     {
-        if (from.Body == null)
+        if (body == null)
         {
             return null;
         }
 
-        var match = _stepAxis2Placement3D.Match(from.Body);
+        var match = _stepAxis2Placement3D.Match(body);
         if (!match.Success)
         {
             return null;
@@ -79,7 +79,7 @@ internal static class StepEntityParser
 
         StepAxis2Placement3D result = new StepAxis2Placement3D()
         {
-            Id = from.Id,
+            Id = id,
             Name = match.Groups["name"].Value ?? string.Empty,
             LocationPointId = int.Parse(match.Groups["point"].Value),
             ZAxisId = int.Parse(match.Groups["zAxis"].Value),
@@ -90,16 +90,16 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepItemDefinedTransformation
-        = new Regex(@"^ITEM_DEFINED_TRANSFORMATION\('(?<name>.*)','(?<description>.*)',#(?<parent>\d*),#(?<child>\d*)\);");
+        = new Regex(@"^\('(?<name>.*)','(?<description>.*)',#(?<parent>\d*),#(?<child>\d*)\);");
 
-    internal static StepItemDefinedTransformation? TryParseToStepItemDefinedTransformation(UndefinedStepEntity from)
+    internal static StepItemDefinedTransformation? TryParseToStepItemDefinedTransformation(int id, string body)
     {
-        if (from.Body == null)
+        if (body == null)
         {
             return null;
         }
 
-        var match = _stepItemDefinedTransformation.Match(from.Body);
+        var match = _stepItemDefinedTransformation.Match(body);
         if (!match.Success)
         {
             return null;
@@ -107,7 +107,7 @@ internal static class StepEntityParser
 
         StepItemDefinedTransformation result = new StepItemDefinedTransformation()
         {
-            Id = from.Id,
+            Id = id,
             Name = match.Groups["name"].Value ?? string.Empty,
             Description = match.Groups["description"].Value ?? string.Empty,
             ParentId = int.Parse(match.Groups["parent"].Value),
@@ -118,16 +118,16 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepShapeRepresentation
-        = new Regex(@"(?s)^SHAPE_REPRESENTATION\('(?<name>.*)',\((?<items>.*)\),#(?<context>\d*)\);");
+        = new Regex(@"(?s)^\('(?<name>.*)',\((?<items>.*)\),#(?<context>\d*)\);");
 
-    internal static StepShapeRepresentation? TryParseToStepShapeRepresentation(UndefinedStepEntity from)
+    internal static StepShapeRepresentation? TryParseToStepShapeRepresentation(int id, string body)
     {
-        if (from.Body == null)
+        if (body == null)
         {
             return null;
         }
 
-        var match = _stepShapeRepresentation.Match(from.Body);
+        var match = _stepShapeRepresentation.Match(body);
         if (!match.Success)
         {
             return null;
@@ -135,7 +135,7 @@ internal static class StepEntityParser
 
         StepShapeRepresentation result = new StepShapeRepresentation()
         {
-            Id = from.Id,
+            Id = id,
             Name = match.Groups["name"].Value ?? string.Empty,
             Items = match.Groups["items"].Value ?? string.Empty,
             ContextOfItemsId = int.Parse(match.Groups["context"].Value)
@@ -145,17 +145,17 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepRepresentationRelationshipWithTransformation
-        = new Regex(@"^(?s)\(.*REPRESENTATION_RELATIONSHIP\('(?<name>.*)','(?<description>.*)',#(?<child>\d*),#(?<parent>\d*)\).*REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION\(#(?<transformation>\d*)\)");
+        = new Regex(@"^(?s)\('(?<name>.*)','(?<description>.*)',#(?<child>\d*),#(?<parent>\d*)\).*REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION\(#(?<transformation>\d*)\)");
 
     internal static StepRepresentationRelationshipWithTransformation? 
-        TryParseToStepRepresentationRelationshipWithTransformation(UndefinedStepEntity from)
+        TryParseToStepRepresentationRelationshipWithTransformation(int id, string body)
     {
-        if (from.Body == null)
+        if (body == null)
         {
             return null;
         }
 
-        var match = _stepRepresentationRelationshipWithTransformation.Match(from.Body);
+        var match = _stepRepresentationRelationshipWithTransformation.Match(body);
         if (!match.Success)
         {
             return null;
@@ -164,7 +164,7 @@ internal static class StepEntityParser
         StepRepresentationRelationshipWithTransformation result 
             = new StepRepresentationRelationshipWithTransformation()
         {
-            Id = from.Id,
+            Id = id,
             Name = match.Groups["name"].Value ?? string.Empty,
             Description = match.Groups["description"].Value ?? string.Empty,
             ChildId = int.Parse(match.Groups["child"].Value),

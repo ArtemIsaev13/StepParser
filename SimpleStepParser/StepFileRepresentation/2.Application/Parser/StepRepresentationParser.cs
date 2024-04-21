@@ -2,6 +2,7 @@
 using SimpleStepParser.StepFileRepresentation._1.Domain;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace SimpleStepParser.StepFileRepresentation._2.Application.Parser;
 
@@ -48,78 +49,113 @@ internal static class StepRepresentationParser
         }
         //Saving data
         StepRepresentation stepRepresentation = new() { Header = header.ToString() };
-        Regex entityStart = new Regex(@"^#(?<id>\d*)=(?<body>.*)");
+        if (stepFile[i].Contains("ENDSEC;"))
+        { 
+            return stepRepresentation;
+        }
+
+        Regex entityStart = new Regex(@"^(?s)#(?<id>\d*)=\(*\n*(?<type>[A-Z0-9_]*)(?<body>.*)");
         for (; i < stepFile.Length; i++)
         {
-            //if the line is the end of data section
-            if (stepFile[i].Contains("ENDSEC;"))
+            if (stepFile[i].Contains('='))
+            {
+                StringBuilder entitySb = new(stepFile[i]);
+
+                while (true)
+                {
+                    if(stepFile[i + 1].Contains('='))
+                    {
+                        break;
+                    }
+                    else if(stepFile[i + 1].Contains("ENDSEC;"))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        i++;
+                        entitySb.Append(stepFile[i]);
+                    }
+                }
+
+                string entity = entitySb.ToString();
+
+                var m = entityStart.Match(entity);
+                if (!m.Success)
+                {
+                    throw new Exception("Error during parsing");
+                }
+
+                int id = int.Parse(m.Groups["id"].Value);
+                string entityType = m.Groups["type"].Value;
+                string entityBody = m.Groups["body"].Value;
+
+                switch (entityType)
+                {
+                    case "CARTESIAN_POINT":
+                        {
+                            var currentEntity = StepEntityParser.TryParseToStepCartesianPoint(id, entityBody);
+                            if (currentEntity != null)
+                            {
+                                stepRepresentation.StepCartesianPoints!.Add(currentEntity);
+                            }
+                            break;
+                        }
+                    case "AXIS2_PLACEMENT_3D":
+                        {
+                            var currentEntity = StepEntityParser.TryParseToStepAxis2Placement3D(id, entityBody);
+                            if (currentEntity != null)
+                            {
+                                stepRepresentation.StepAxis2Placements3D!.Add(currentEntity);
+                            }
+                            break;
+                        }
+                    case "DIRECTION":
+                        {
+                            var currentEntity = StepEntityParser.TryParseToStepDirection(id, entityBody);
+                            if(currentEntity != null)
+                            {
+                                stepRepresentation.StepDirections!.Add(currentEntity);
+                            }
+                            break;
+                        }
+                    case "ITEM_DEFINED_TRANSFORMATION":
+                        {
+                            var currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(id, entityBody);
+                            if (currentEntity != null)
+                            {
+                                stepRepresentation.StepItemDefinedTransformations!.Add(currentEntity);
+                            }
+                            break;
+                        }
+                    case "REPRESENTATION_RELATIONSHIP":
+                        {
+                            var currentEntity = StepEntityParser.TryParseToStepRepresentationRelationshipWithTransformation(id, entityBody);
+                            if (currentEntity != null)
+                            {
+                                stepRepresentation.StepRepresentationsRelationshipWithTransformation!.Add(currentEntity);
+                            }
+                            break;
+                        }
+                    case "SHAPE_REPRESENTATION":
+                        {
+                            var currentEntity = StepEntityParser.TryParseToStepShapeRepresentation(id, entityBody);
+                            if (currentEntity != null)
+                            {
+                                stepRepresentation.StepShapeRepresentations!.Add(currentEntity);
+                            }
+                            break;
+                        }
+                }
+
+            }
+            else if(stepFile[i].Contains("ENDSEC;"))
             {
                 break;
             }
-
-            var m = entityStart.Match(stepFile[i]);
-            if (!m.Success)
+            else
             {
                 continue;
-            }
-            int id = int.Parse(m.Groups["id"].Value);
-
-            StringBuilder body = new();
-            body.Append(m.Groups["body"].Value);
-
-            int bracketNum =
-                stepFile[i].Count(x => x == '(') -
-                stepFile[i].Count(x => x == ')');
-            while (bracketNum > 0)
-            {
-                i++;
-                body.Append(stepFile[i]);
-                bracketNum +=
-                stepFile[i].Count(x => x == '(') -
-                stepFile[i].Count(x => x == ')');
-            }
-
-            var undefinedStepEntity =
-                new UndefinedStepEntity()
-                {
-                    Id = id,
-                    Body = body.ToString()
-                };
-            AbstractStepEntity? currentEntity = null;
-
-            if (!string.IsNullOrEmpty(undefinedStepEntity.Body))
-            {
-                //Sorted by frequency of occurrence in the common step file
-                if ((currentEntity = StepEntityParser.TryParseToStepCartesianPoint(undefinedStepEntity)) != null)
-                {
-                    stepRepresentation.StepCartesianPoints?.Add((StepCartesianPoint)currentEntity);
-                }
-                else if ((currentEntity = StepEntityParser.TryParseToStepAxis2Placement3D(undefinedStepEntity)) != null)
-                {
-                    stepRepresentation.StepAxis2Placements3D?.Add((StepAxis2Placement3D)currentEntity);
-                }
-                else if ((currentEntity = StepEntityParser.TryParseToStepDirection(undefinedStepEntity)) != null)
-                {
-                    stepRepresentation.StepDirections?.Add((StepDirection)currentEntity);
-                }
-                else if ((currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(undefinedStepEntity)) != null)
-                {
-                    stepRepresentation.StepItemDefinedTransformations?.Add((StepItemDefinedTransformation)currentEntity);
-                }
-                else if ((currentEntity
-                    = StepEntityParser.TryParseToStepRepresentationRelationshipWithTransformation(undefinedStepEntity)) != null)
-                {
-                    stepRepresentation.StepRepresentationsRelationshipWithTransformation?
-                        .Add((StepRepresentationRelationshipWithTransformation)currentEntity);
-                }
-                else if ((currentEntity = StepEntityParser.TryParseToStepShapeRepresentation(undefinedStepEntity)) != null)
-                {
-                    stepRepresentation.StepShapeRepresentations?.Add((StepShapeRepresentation)currentEntity);
-                }
-                else
-                {
-                    stepRepresentation.UndefinedStepEntities?.Add(undefinedStepEntity);
-                }
             }
         }
 
