@@ -64,7 +64,7 @@ internal static class StepRepresentationParser
         Regex entityStart = new Regex(@"^(?s)#(?<id>\d*)=\(*\n*(?<type>[A-Z0-9_]*)(?<body>.*)");
         for (; i < stepFile.Length; i++)
         {
-            StringBuilder entitySb = new(stepFile[i]);
+            StringBuilder? entitySb = null;
 
             bool endOfFile = false;
             while (true)
@@ -80,6 +80,10 @@ internal static class StepRepresentationParser
                 }
                 else
                 {
+                    if(entitySb == null)
+                    {
+                        entitySb = new(stepFile[i]);
+                    }
                     i++;
                     entitySb.Append(stepFile[i]);
                 }
@@ -90,7 +94,8 @@ internal static class StepRepresentationParser
                 break;
             }
 
-            string entity = entitySb.ToString();
+            //Does the command have one line or many lines?
+            string entity = entitySb == null ? stepFile[i] : entitySb.ToString();
 
             var m = entityStart.Match(entity);
             if (!m.Success)
