@@ -49,113 +49,116 @@ internal static class StepRepresentationParser
         }
         //Saving data
         StepRepresentation stepRepresentation = new() { Header = header.ToString() };
-        if (stepFile[i].Contains("ENDSEC;"))
-        { 
-            return stepRepresentation;
+        while (!stepFile[i].Contains('='))
+        {
+            if (stepFile[i + 1].Contains("ENDSEC;"))
+            {
+                return stepRepresentation;
+            }
+            else
+            {
+                i++;
+            }
         }
 
         Regex entityStart = new Regex(@"^(?s)#(?<id>\d*)=\(*\n*(?<type>[A-Z0-9_]*)(?<body>.*)");
         for (; i < stepFile.Length; i++)
         {
-            if (stepFile[i].Contains('='))
+            StringBuilder entitySb = new(stepFile[i]);
+
+            bool endOfFile = false;
+            while (true)
             {
-                StringBuilder entitySb = new(stepFile[i]);
-
-                while (true)
+                if (stepFile[i + 1].Contains('='))
                 {
-                    if(stepFile[i + 1].Contains('='))
-                    {
-                        break;
-                    }
-                    else if(stepFile[i + 1].Contains("ENDSEC;"))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        i++;
-                        entitySb.Append(stepFile[i]);
-                    }
+                    break;
                 }
-
-                string entity = entitySb.ToString();
-
-                var m = entityStart.Match(entity);
-                if (!m.Success)
+                else if (stepFile[i + 1].Contains("ENDSEC;"))
                 {
-                    throw new Exception("Error during parsing");
+                    endOfFile = true;
+                    break;
                 }
-
-                int id = int.Parse(m.Groups["id"].Value);
-                string entityType = m.Groups["type"].Value;
-                string entityBody = m.Groups["body"].Value;
-
-                switch (entityType)
+                else
                 {
-                    case "CARTESIAN_POINT":
-                        {
-                            var currentEntity = StepEntityParser.TryParseToStepCartesianPoint(id, entityBody);
-                            if (currentEntity != null)
-                            {
-                                stepRepresentation.StepCartesianPoints!.Add(currentEntity);
-                            }
-                            break;
-                        }
-                    case "AXIS2_PLACEMENT_3D":
-                        {
-                            var currentEntity = StepEntityParser.TryParseToStepAxis2Placement3D(id, entityBody);
-                            if (currentEntity != null)
-                            {
-                                stepRepresentation.StepAxis2Placements3D!.Add(currentEntity);
-                            }
-                            break;
-                        }
-                    case "DIRECTION":
-                        {
-                            var currentEntity = StepEntityParser.TryParseToStepDirection(id, entityBody);
-                            if(currentEntity != null)
-                            {
-                                stepRepresentation.StepDirections!.Add(currentEntity);
-                            }
-                            break;
-                        }
-                    case "ITEM_DEFINED_TRANSFORMATION":
-                        {
-                            var currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(id, entityBody);
-                            if (currentEntity != null)
-                            {
-                                stepRepresentation.StepItemDefinedTransformations!.Add(currentEntity);
-                            }
-                            break;
-                        }
-                    case "REPRESENTATION_RELATIONSHIP":
-                        {
-                            var currentEntity = StepEntityParser.TryParseToStepRepresentationRelationshipWithTransformation(id, entityBody);
-                            if (currentEntity != null)
-                            {
-                                stepRepresentation.StepRepresentationsRelationshipWithTransformation!.Add(currentEntity);
-                            }
-                            break;
-                        }
-                    case "SHAPE_REPRESENTATION":
-                        {
-                            var currentEntity = StepEntityParser.TryParseToStepShapeRepresentation(id, entityBody);
-                            if (currentEntity != null)
-                            {
-                                stepRepresentation.StepShapeRepresentations!.Add(currentEntity);
-                            }
-                            break;
-                        }
+                    i++;
+                    entitySb.Append(stepFile[i]);
                 }
-
             }
-            else if(stepFile[i].Contains("ENDSEC;"))
+
+            if(endOfFile)
             {
                 break;
             }
-            else
+
+            string entity = entitySb.ToString();
+
+            var m = entityStart.Match(entity);
+            if (!m.Success)
             {
-                continue;
+                //TODO: add new Exception class
+                throw new Exception("Error during parsing");
+            }
+
+            int id = int.Parse(m.Groups["id"].Value);
+            string entityType = m.Groups["type"].Value;
+            string entityBody = m.Groups["body"].Value;
+
+            switch (entityType)
+            {
+                case "CARTESIAN_POINT":
+                    {
+                        var currentEntity = StepEntityParser.TryParseToStepCartesianPoint(id, entityBody);
+                        if (currentEntity != null)
+                        {
+                            stepRepresentation.StepCartesianPoints!.Add(currentEntity);
+                        }
+                        break;
+                    }
+                case "AXIS2_PLACEMENT_3D":
+                    {
+                        var currentEntity = StepEntityParser.TryParseToStepAxis2Placement3D(id, entityBody);
+                        if (currentEntity != null)
+                        {
+                            stepRepresentation.StepAxis2Placements3D!.Add(currentEntity);
+                        }
+                        break;
+                    }
+                case "DIRECTION":
+                    {
+                        var currentEntity = StepEntityParser.TryParseToStepDirection(id, entityBody);
+                        if (currentEntity != null)
+                        {
+                            stepRepresentation.StepDirections!.Add(currentEntity);
+                        }
+                        break;
+                    }
+                case "ITEM_DEFINED_TRANSFORMATION":
+                    {
+                        var currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(id, entityBody);
+                        if (currentEntity != null)
+                        {
+                            stepRepresentation.StepItemDefinedTransformations!.Add(currentEntity);
+                        }
+                        break;
+                    }
+                case "REPRESENTATION_RELATIONSHIP":
+                    {
+                        var currentEntity = StepEntityParser.TryParseToStepRepresentationRelationshipWithTransformation(id, entityBody);
+                        if (currentEntity != null)
+                        {
+                            stepRepresentation.StepRepresentationsRelationshipWithTransformation!.Add(currentEntity);
+                        }
+                        break;
+                    }
+                case "SHAPE_REPRESENTATION":
+                    {
+                        var currentEntity = StepEntityParser.TryParseToStepShapeRepresentation(id, entityBody);
+                        if (currentEntity != null)
+                        {
+                            stepRepresentation.StepShapeRepresentations!.Add(currentEntity);
+                        }
+                        break;
+                    }
             }
         }
 
