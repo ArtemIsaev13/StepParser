@@ -112,29 +112,35 @@ internal static class StepRepresentationParser
             {
                 case "CARTESIAN_POINT":
                     {
-                        var currentEntity = StepEntityParser.TryParseToStepCartesianPoint(id, entityBody);
-                        if (currentEntity != null)
-                        {
-                            stepRepresentation.StepCartesianPoints!.Add(currentEntity);
-                        }
+                        stepRepresentation.StepCartesianPoints!.Add(
+                            new LazyStepEntity<StepCartesianPoint>()
+                            {  
+                                Body = entityBody, 
+                                Id = id}
+                            );
                         break;
                     }
                 case "AXIS2_PLACEMENT_3D":
                     {
-                        var currentEntity = StepEntityParser.TryParseToStepAxis2Placement3D(id, entityBody);
-                        if (currentEntity != null)
-                        {
-                            stepRepresentation.StepAxis2Placements3D!.Add(currentEntity);
-                        }
+                        stepRepresentation.StepAxis2Placements3D!.Add(
+                            new LazyStepEntity<StepAxis2Placement3D>()
+                            {
+                                Body = entityBody,
+                                Id = id
+                            }
+                            );
                         break;
                     }
                 case "DIRECTION":
+
                     {
-                        var currentEntity = StepEntityParser.TryParseToStepDirection(id, entityBody);
-                        if (currentEntity != null)
-                        {
-                            stepRepresentation.StepDirections!.Add(currentEntity);
-                        }
+                        stepRepresentation.StepDirections!.Add(
+                            new LazyStepEntity<StepDirection>()
+                            {
+                                Body = entityBody,
+                                Id = id
+                            }
+                            );
                         break;
                     }
                 case "ITEM_DEFINED_TRANSFORMATION":

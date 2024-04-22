@@ -2,6 +2,7 @@
 using SimpleStepParser.SimplifiedModelRepresentation._1.Domain;
 using SimpleStepParser.StepFileRepresentation._1.Domain;
 using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
+using SimpleStepParser.StepFileRepresentation._2.Application.Extensions;
 
 namespace SimpleStepParser.SimplifiedModelRepresentation._2.Application;
 
@@ -77,7 +78,7 @@ internal static class ModelInterpretator
             stepFileRepresentation.StepItemDefinedTransformations!.First(s => s.Id == id).ChildId;
 
         StepAxis2Placement3D? currentStepAxis2Placement3D
-            = stepFileRepresentation.StepAxis2Placements3D!.First(s => (s.Id == currentCsId));
+            = stepFileRepresentation.StepAxis2Placements3D!.First(s => (s.Id == currentCsId)).GetEntity();
 
         if(currentStepAxis2Placement3D == null)
         {
@@ -86,15 +87,15 @@ internal static class ModelInterpretator
 
         StepDirection? axisZ 
             = stepFileRepresentation.StepDirections!
-            .First(s => (s.Id == currentStepAxis2Placement3D.ZAxisId));
+            .First(s => (s.Id == currentStepAxis2Placement3D.ZAxisId)).GetEntity();
 
         StepDirection? axisX
             = stepFileRepresentation.StepDirections!
-            .First(s => (s.Id == currentStepAxis2Placement3D.XAxisId));
+            .First(s => (s.Id == currentStepAxis2Placement3D.XAxisId)).GetEntity();
         
         StepCartesianPoint? origin
             = stepFileRepresentation.StepCartesianPoints!
-            .First(s => (s.Id == currentStepAxis2Placement3D.LocationPointId));
+            .First(s => (s.Id == currentStepAxis2Placement3D.LocationPointId)).GetEntity();
         
         if (axisZ == null ||
             axisX == null ||
