@@ -4,6 +4,10 @@
 /// </summary>
 internal class StepCartesianPoint : AbstractStepEntity
 {
+    public StepCartesianPoint(int id) : base(id)
+    {
+    }
+
     public string? Name { get; init; }
     public float X { get; init; }
     public float Y { get; init; }
