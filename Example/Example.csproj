@@ -25,6 +25,9 @@
     <None Update="StepExamples\SiemensNx11_step_ap242.stp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="StepExamples\SiemensNx11_step_ap242_cyrillic.stp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="StepExamples\SiemensNxStep.stp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

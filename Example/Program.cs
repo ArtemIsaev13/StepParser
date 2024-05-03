@@ -6,21 +6,28 @@ using System.Diagnostics;
 Console.WriteLine("Hello, World!");
 
 string StepExamplesFolder = "StepExamples";
-string SiemensNx11StepAp242 = Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap242.stp");
+string[] testFiles = { 
+    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap203.stp"), 
+    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap214.stp"), 
+    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap242.stp"), 
+    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap242_cyrillic.stp") 
+};
 
 Stopwatch stopwatch = new Stopwatch();
 
-Model? model = null;
+Assembly? assembly = null;
 
-int numOfTests = 10;
+int numOfTests = 1;
 stopwatch.Start();
 for (int i = 0; i < numOfTests; i++)
 {
-    model = SimpleStepParser.SimpleStepParser.ReadStepFile(SiemensNx11StepAp242);
+    foreach (var testFile in testFiles)
+    {
+        assembly = SimpleStepParser.SimpleStepParser.ReadStepFile(testFile);
+        Console.WriteLine(assembly?.Root?.GetModelTreeString() ?? string.Empty);
+    }
 }
 stopwatch.Stop();
-
-Console.WriteLine(model?.GetModelTreeString());
 
 Console.WriteLine($"Execution time in ms: {stopwatch.ElapsedMilliseconds/numOfTests}");
 
