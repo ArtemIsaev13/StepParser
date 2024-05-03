@@ -4,6 +4,10 @@
 /// </summary>
 internal class StepDirection : UndefinedStepEntity
 {
+    public StepDirection(int id) : base(id)
+    {
+    }
+
     public string? Name { get; init; }
     public float I { get; init; }
     public float J { get; init; }

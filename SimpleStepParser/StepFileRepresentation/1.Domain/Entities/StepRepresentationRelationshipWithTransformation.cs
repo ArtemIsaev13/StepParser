@@ -6,6 +6,10 @@
 /// </summary>
 internal class StepRepresentationRelationshipWithTransformation : AbstractStepEntity
 {
+    public StepRepresentationRelationshipWithTransformation(int id) : base(id)
+    {
+    }
+
     public string? Name { get; init; }
     public string? Description { get; init; }
     public int ParentId { get; init; }

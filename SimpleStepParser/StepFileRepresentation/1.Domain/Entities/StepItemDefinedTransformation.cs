@@ -4,6 +4,10 @@
 /// </summary>
 internal class StepItemDefinedTransformation : AbstractStepEntity
 {
+    public StepItemDefinedTransformation(int id) : base(id)
+    {
+    }
+
     public string? Name { get; init; }
     public string? Description { get; init; }
     public int ParentId { get; init; }

@@ -1,7 +1,7 @@
 ﻿using MathNet.Spatial.Euclidean;
 using SimpleStepParser.SimplifiedModelRepresentation._1.Domain;
-using SimpleStepParser.StepFileRepresentation._1.Domain;
 using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
+using SimpleStepParser.StepFileRepresentation._1.Domain.StepRepresentation;
 
 namespace SimpleStepParser.SimplifiedModelRepresentation._2.Application;
 
@@ -18,17 +18,21 @@ internal static class ModelInterpretator
 
         foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation!)
         {
+            if(relationship.Value == null)
+            {
+                continue;
+            }
             //Creating models for parent if necessary 
-            AddModel(ref models, relationship.ParentId, stepFileRepresentation);
+            AddModel(ref models, relationship.Value.ParentId, stepFileRepresentation);
             //Creating models for child
-            AddModel(ref models, relationship.ChildId, stepFileRepresentation);
+            AddModel(ref models, relationship.Value.ChildId, stepFileRepresentation);
             //Adding child to parent
-            models[relationship.ParentId].Childs.Add(models[relationship.ChildId]);
+            models[relationship.Value.ParentId].Childs.Add(models[relationship.Value.ChildId]);
             //Adding parent to child
-            models[relationship.ChildId].Parent = models[relationship.ParentId];
+            models[relationship.Value.ChildId].Parent = models[relationship.Value.ParentId];
             //Adding CoordinateSystem
-            models[relationship.ChildId].CoordinateSystem 
-                = GetCoordinateSystem(relationship.TransformationId, stepFileRepresentation);
+            models[relationship.Value.ChildId].CoordinateSystem 
+                = GetCoordinateSystem(relationship.Value.TransformationId, stepFileRepresentation);
         }
 
         //Root it is parentless model
@@ -60,9 +64,9 @@ internal static class ModelInterpretator
         }
         //Finding model name
         var collection = stepFileRepresentation.StepShapeRepresentations?.Where(f => (f.Id == id));
-        if(collection?.Count() == 1 && collection.First()?.Name != null)
+        if(collection?.Count() == 1 && collection.FirstOrDefault()?.Value?.Name != null)
         {
-            model.Name = collection.First().Name!;
+            model.Name = collection.First().Value!.Name!;
         }
         else
         {
@@ -74,10 +78,15 @@ internal static class ModelInterpretator
     {
         // Оnly child CS is matter by some reason
         int currentCsId = 
-            stepFileRepresentation.StepItemDefinedTransformations!.First(s => s.Id == id).ChildId;
+            stepFileRepresentation.StepItemDefinedTransformations!
+            .Find(s => s.Id == id)?.Value?.ChildId ?? 0;
+        if (currentCsId == 0)
+        {
+            return null;
+        }
 
         StepAxis2Placement3D? currentStepAxis2Placement3D
-            = stepFileRepresentation.StepAxis2Placements3D!.First(s => (s.Id == currentCsId));
+            = stepFileRepresentation.StepAxis2Placements3D!.Find(s => (s.Id == currentCsId))?.Value;
 
         if(currentStepAxis2Placement3D == null)
         {
@@ -86,15 +95,15 @@ internal static class ModelInterpretator
 
         StepDirection? axisZ 
             = stepFileRepresentation.StepDirections!
-            .First(s => (s.Id == currentStepAxis2Placement3D.ZAxisId));
+            .First(s => (s.Id == currentStepAxis2Placement3D.ZAxisId)).Value;
 
         StepDirection? axisX
             = stepFileRepresentation.StepDirections!
-            .First(s => (s.Id == currentStepAxis2Placement3D.XAxisId));
+            .First(s => (s.Id == currentStepAxis2Placement3D.XAxisId)).Value;
         
         StepCartesianPoint? origin
             = stepFileRepresentation.StepCartesianPoints!
-            .First(s => (s.Id == currentStepAxis2Placement3D.LocationPointId));
+            .First(s => (s.Id == currentStepAxis2Placement3D.LocationPointId)).Value;
         
         if (axisZ == null ||
             axisX == null ||
