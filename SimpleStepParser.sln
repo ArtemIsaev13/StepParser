@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleStepParser", "SimpleStepParser\SimpleStepParser.csproj", "{104F3948-1504-4EDC-A943-27928B5DBF66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleStepParser", "SimpleStepParser\SimpleStepParser.csproj", "{104F3948-1504-4EDC-A943-27928B5DBF66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{66FBF72E-1774-4FC0-A7C5-502C0EBCB8DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.csproj", "{66FBF72E-1774-4FC0-A7C5-502C0EBCB8DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleStepParser.Tests", "SimpleStepParser.Tests\SimpleStepParser.Tests.csproj", "{A90F0A15-E646-47AB-B5B8-18611DED3DE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{66FBF72E-1774-4FC0-A7C5-502C0EBCB8DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66FBF72E-1774-4FC0-A7C5-502C0EBCB8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66FBF72E-1774-4FC0-A7C5-502C0EBCB8DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A90F0A15-E646-47AB-B5B8-18611DED3DE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A90F0A15-E646-47AB-B5B8-18611DED3DE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A90F0A15-E646-47AB-B5B8-18611DED3DE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A90F0A15-E646-47AB-B5B8-18611DED3DE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
