@@ -46,7 +46,7 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepDirectionRegex
-        = new Regex(@"^\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);");
+        = new Regex(@"^\('(?<name>.*)',\((?<i>.*),(?<j>.*),(?<k>.*)\)\);", RegexOptions.Compiled);
 
     internal static StepDirection? TryParseToStepDirection(int id, string body)
     {
@@ -73,7 +73,8 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepCartesianPoint
-        = new Regex(@"^\('(?<name>.*)',\((?<x>.*),(?<y>.*),(?<z>.*)\)\);");
+        = new Regex(@"^\('(?<name>.*)',\((?<x>.*),(?<y>.*),(?<z>.*)\)\);",
+            RegexOptions.Compiled);
 
     internal static StepCartesianPoint? TryParseToStepCartesianPoint(int id, string body)
     {
@@ -100,7 +101,8 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepAxis2Placement3D
-        = new Regex(@"^\('(?<name>.*)',#(?<point>\d*),#(?<zAxis>\d*),#(?<xAxis>\d*)\);");
+        = new Regex(@"^\('(?<name>.*)',#(?<point>\d*),#(?<zAxis>\d*),#(?<xAxis>\d*)\);",
+            RegexOptions.Compiled);
 
     internal static StepAxis2Placement3D? TryParseToStepAxis2Placement3D(int id, string body)
     {
@@ -127,7 +129,8 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepItemDefinedTransformation
-        = new Regex(@"^\('(?<name>.*)','(?<description>.*)',#(?<parent>\d*),#(?<child>\d*)\);");
+        = new Regex(@"^\('(?<name>.*)','(?<description>.*)',#(?<parent>\d*),#(?<child>\d*)\);", 
+            RegexOptions.Compiled);
 
     internal static StepItemDefinedTransformation? TryParseToStepItemDefinedTransformation(int id, string body)
     {
@@ -154,7 +157,8 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepShapeRepresentation
-        = new Regex(@"(?s)^\('(?<name>.*)',\((?<items>.*)\),#(?<context>\d*)\);");
+        = new Regex(@"(?s)^\('(?<name>.*)',\((?<items>.*)\),#(?<context>\d*)\);", 
+            RegexOptions.Compiled);
 
     internal static StepShapeRepresentation? TryParseToStepShapeRepresentation(int id, string body)
     {
@@ -180,7 +184,8 @@ internal static class StepEntityParser
     }
 
     private static readonly Regex _stepRepresentationRelationshipWithTransformation
-        = new Regex(@"^(?s)\('(?<name>.*)','(?<description>.*)',#(?<child>\d*),#(?<parent>\d*)\).*REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION\(#(?<transformation>\d*)\)");
+        = new Regex(@"^(?s)\('(?<name>.*)','(?<description>.*)',#(?<child>\d*),#(?<parent>\d*)\).*REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION\(#(?<transformation>\d*)\)", 
+            RegexOptions.Compiled);
 
     internal static StepRepresentationRelationshipWithTransformation? 
         TryParseToStepRepresentationRelationshipWithTransformation(int id, string body)
