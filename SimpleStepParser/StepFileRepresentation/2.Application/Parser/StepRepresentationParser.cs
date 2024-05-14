@@ -63,7 +63,8 @@ internal static class StepRepresentationParser
             }
         }
 
-        Regex entityStart = new Regex(@"^(?s)#(?<id>\d*)=\(*\n*(?<type>[A-Z0-9_]*)(?<body>.*)");
+        Regex entityStart = new Regex(@"^(?s)#(?<id>\d*)=\(*\n*(?<type>[A-Z0-9_]*)(?<body>.*)",
+            RegexOptions.Compiled);
         for (; i < stepFile.Length; i++)
         {
             StringBuilder? entitySb = null;
