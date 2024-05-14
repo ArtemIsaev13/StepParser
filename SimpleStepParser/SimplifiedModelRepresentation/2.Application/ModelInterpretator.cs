@@ -14,7 +14,7 @@ internal static class ModelInterpretator
             return null;
         }
 
-        Dictionary<int, Model> models = new();
+        Dictionary<int, List<Model>> models = new();
 
         foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation!)
         {
@@ -22,46 +22,71 @@ internal static class ModelInterpretator
             {
                 continue;
             }
+
             //Creating models for parent if necessary 
-            AddModel(ref models, relationship.Value.ParentId, stepFileRepresentation);
+            if(!models.ContainsKey(relationship.Value.ParentId))
+            {
+                Model parent = GetModel(relationship.Value.ParentId, stepFileRepresentation);
+                models.Add(relationship.Value.ParentId, new() { parent });
+            }
+            List<Model> parents = models[relationship.Value.ParentId];
+
             //Creating models for child
-            AddModel(ref models, relationship.Value.ChildId, stepFileRepresentation);
-            //Adding child to parent
-            models[relationship.Value.ParentId].Childs.Add(models[relationship.Value.ChildId]);
-            //Adding parent to child
-            models[relationship.Value.ChildId].Parent = models[relationship.Value.ParentId];
+            Model child = GetModel(relationship.Value.ChildId, stepFileRepresentation);
+            
+            //If there are another exemplars of child we need to copy some information
+            if(models.ContainsKey(relationship.Value.ChildId))
+            {
+                if (models[relationship.Value.ChildId].Count > 0)
+                {
+                    Model sibling = models[relationship.Value.ChildId][0];
+                    foreach (var ownChild in sibling.Childs)
+                    {
+                        child.Childs.Add(ownChild.GetDeepCopy());
+                    }
+                }
+            }
+            else
+            {
+                models.Add(relationship.Value.ChildId, new ());
+            }
+
             //Adding CoordinateSystem
-            models[relationship.Value.ChildId].CoordinateSystem 
-                = GetCoordinateSystem(relationship.Value.TransformationId, stepFileRepresentation);
+            child.CoordinateSystem = GetCoordinateSystem(relationship.Value.TransformationId, stepFileRepresentation);
+
+            //Adding child to all parents:
+            foreach (var parent in parents)
+            {
+                var currentChild = child.GetDeepCopy();
+                //Adding parent to child
+                currentChild.Parent = parent;
+                parent.Childs.Add(currentChild);
+
+                models[relationship.Value.ChildId].Add(currentChild);
+            }
         }
 
         //Root it is parentless model
         Model? result = null;
-        foreach(var model in models.Values)
+        foreach(var modelList in models.Values)
         {
-            if(model.Parent == null)
+            foreach (var model in modelList)
             {
-                result = model;
-                break;
+                if (model.Parent == null)
+                {
+                    result = model;
+                    break;
+                }
             }
         }
 
         return result;
     }
 
-    private static void AddModel(ref Dictionary<int, Model> models, int id, StepRepresentation stepFileRepresentation)
+    private static Model GetModel(int id, StepRepresentation stepFileRepresentation)
     {
         //Adding model if necessary
-        Model? model = null;
-        if (models.ContainsKey(id))
-        {
-            return;
-        }
-        else
-        {
-            model = new Model();
-            models.Add(id, model);
-        }
+        Model? model = new ();
         //Finding model name
         var collection = stepFileRepresentation.StepShapeRepresentations?.Where(f => (f.Id == id));
         if(collection?.Count() == 1 && collection.FirstOrDefault()?.Value?.Name != null)
@@ -72,6 +97,7 @@ internal static class ModelInterpretator
         {
             model.Name = "Unnamed model";
         }
+        return model;
     }
 
     private static CoordinateSystem? GetCoordinateSystem(int id, StepRepresentation stepFileRepresentation)
