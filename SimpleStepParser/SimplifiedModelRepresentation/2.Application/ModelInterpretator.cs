@@ -16,53 +16,60 @@ internal static class ModelInterpretator
 
         Dictionary<int, List<Model>> models = new();
 
-        foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation!)
+        foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation!.Select(v => v.Value))
         {
-            if(relationship.Value == null)
+            if(relationship == null)
             {
                 continue;
             }
 
             //Creating models for parent if necessary 
-            if(!models.ContainsKey(relationship.Value.ParentId))
+            if(!models.ContainsKey(relationship.ParentId))
             {
-                Model parent = GetModel(relationship.Value.ParentId, stepFileRepresentation);
-                models.Add(relationship.Value.ParentId, new() { parent });
+                Model parent = GetModel(relationship.ParentId, stepFileRepresentation);
+                models.Add(relationship.ParentId, new() { parent });
             }
-            List<Model> parents = models[relationship.Value.ParentId];
+            List<Model> parents = models[relationship.ParentId];
 
             //Creating models for child
-            Model child = GetModel(relationship.Value.ChildId, stepFileRepresentation);
-            
+            Model child = null;
+
             //If there are another exemplars of child we need to copy some information
-            if(models.ContainsKey(relationship.Value.ChildId))
+            if (models.ContainsKey(relationship.ChildId))
             {
-                if (models[relationship.Value.ChildId].Count > 0)
+                //If this is parentless model
+                if(models[relationship.ChildId].Count == 1 && models[relationship.ChildId][0].Parent == null)
                 {
-                    Model sibling = models[relationship.Value.ChildId][0];
-                    foreach (var ownChild in sibling.Childs)
-                    {
-                        child.Childs.Add(ownChild.GetDeepCopy());
-                    }
+                    child = models[relationship.ChildId][0];
+                }
+                //If the same models already exists
+                else if (models[relationship.ChildId].Count > 0)
+                {
+                    child = models[relationship.ChildId][0].GetDeepCopy();
                 }
             }
             else
             {
-                models.Add(relationship.Value.ChildId, new ());
+                models.Add(relationship.ChildId, new ());
+                child = GetModel(relationship.ChildId, stepFileRepresentation);
+                models[relationship.ChildId].Add(child);
             }
 
             //Adding CoordinateSystem
-            child.CoordinateSystem = GetCoordinateSystem(relationship.Value.TransformationId, stepFileRepresentation);
+            child!.CoordinateSystem = GetCoordinateSystem(relationship.TransformationId, stepFileRepresentation);
 
             //Adding child to all parents:
-            foreach (var parent in parents)
+            for(int i = 0; i < parents.Count; i++)
             {
-                var currentChild = child.GetDeepCopy();
+                Model currentChild = child;
+                if(i != 0)
+                {
+                    currentChild = child.GetDeepCopy();
+                    models[relationship.ChildId].Add(currentChild);
+                }
                 //Adding parent to child
-                currentChild.Parent = parent;
-                parent.Childs.Add(currentChild);
-
-                models[relationship.Value.ChildId].Add(currentChild);
+                currentChild.Parent = parents[i];
+                parents[i].Childs.Add(currentChild);
             }
         }
 
