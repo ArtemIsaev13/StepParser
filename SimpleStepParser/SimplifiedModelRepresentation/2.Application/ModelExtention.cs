@@ -14,6 +14,11 @@ public static class ModelExtention
     /// <returns></returns>
     public static CoordinateSystem? GetTransformationTo(this Model model, Model child)
     {
+        if(model?.CoordinateSystem == null || child?.CoordinateSystem == null)
+        {
+            return null;
+        }
+
         Model current = child;
         CoordinateSystem result = child.CoordinateSystem;
         if(result == null)
