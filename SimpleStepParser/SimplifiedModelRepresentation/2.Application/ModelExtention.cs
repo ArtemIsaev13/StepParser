@@ -51,23 +51,28 @@ public static class ModelExtention
     /// </summary>
     /// <param name="model">Root</param>
     /// <param name="regex">Regex</param>
+    /// <param name="recursive">Should children's children be checked?</param>
     /// <returns></returns>
-    public static List<Model> GetChildByName(this Model model, Regex regex)
+    public static List<Model> GetChildByName(this Model model, Regex regex, bool recursive = true)
     {
         List<Model> result = new();
-        if(!string.IsNullOrEmpty(model.Name))
-        {
-            var match = regex.Match(model.Name);
-            if(match.Success)
-            {
-                result.Add(model);
-            }
-        }
 
-        foreach(var child in model.Childs)
+        foreach (var child in model.Childs)
         {
-            List<Model> models = child.GetChildByName(regex);
-            result.AddRange(models);
+            if (!string.IsNullOrEmpty(child.Name))
+            {
+                var match = regex.Match(child.Name);
+                if (match.Success)
+                {
+                    result.Add(child);
+                }
+            }
+
+            if (recursive)
+            {
+                List<Model> models = child.GetChildByName(regex);
+                result.AddRange(models);
+            }
         }
 
         return result;
