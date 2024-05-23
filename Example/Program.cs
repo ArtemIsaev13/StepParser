@@ -7,10 +7,11 @@ Console.WriteLine("Hello, World!");
 
 string StepExamplesFolder = "StepExamples";
 string[] testFiles = { 
-    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap203.stp"), 
-    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap214.stp"), 
-    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap242.stp"), 
-    Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap242_cyrillic.stp") 
+    Path.Combine(StepExamplesFolder, "myfirstassembly_asm.stp"), 
+    //Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap203.stp"), 
+    //Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap214.stp"), 
+    //Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap242.stp"), 
+    //Path.Combine(StepExamplesFolder, "SiemensNx11_step_ap242_cyrillic.stp") 
 };
 
 Stopwatch stopwatch = new Stopwatch();

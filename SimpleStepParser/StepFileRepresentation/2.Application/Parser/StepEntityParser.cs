@@ -41,6 +41,21 @@ internal static class StepEntityParser
                     result = TryParseToStepShapeRepresentation(from.Id, from.Body);
                     break;
                 }
+            case StepEntityType.CONTEXT_DEPENDENT_SHAPE_REPRESENTATION:
+                {
+                    result = TryParseToStepContextDependentShapeRepresentation(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.PRODUCT_DEFINITION_SHAPE:
+                {
+                    result = TryParseToStepProductDefinitionShape(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.NEXT_ASSEMBLY_USAGE_OCCURRENCE:
+                {
+                    result = TryParseToStepNextAssemblyUsageOccurrence(from.Id, from.Body);
+                    break;
+                }
         }
         return (result == null);
     }
@@ -209,6 +224,91 @@ internal static class StepEntityParser
                 ChildId = int.Parse(match.Groups["child"].Value),
                 ParentId = int.Parse(match.Groups["parent"].Value),
                 TransformationId = int.Parse(match.Groups["transformation"].Value)
+            };
+        return result;
+    }
+
+    private static readonly Regex _stepContexDependentShapeRepresentation
+        = new Regex(@"^\(#(?<repRel>\d*),#(?<repProdRel>\d*)\);", RegexOptions.Compiled);
+
+    internal static StepContextDependentShapeRepresentation?
+        TryParseToStepContextDependentShapeRepresentation(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepContexDependentShapeRepresentation.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepContextDependentShapeRepresentation result
+            = new StepContextDependentShapeRepresentation(id)
+            {
+                RepresentationRelation = int.Parse(match.Groups["repRel"].Value),
+                RepresentedProductRelation = int.Parse(match.Groups["repProdRel"].Value)
+            };
+        return result;
+    }
+
+    private static readonly Regex _stepProductDefinitionShape
+        = new Regex(@"^\('(?<name>.*)','(?<description>.*)',#(?<definition>\d*)\);", RegexOptions.Compiled);
+
+    internal static StepProductDefinitionShape? 
+        TryParseToStepProductDefinitionShape(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepProductDefinitionShape.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepProductDefinitionShape result
+            = new StepProductDefinitionShape(id)
+            {
+                Name = match.Groups["name"].Value,
+                Description = match.Groups["description"].Value,
+                Definition = int.Parse(match.Groups["definition"].Value)
+            };
+        return result;
+    }
+
+
+    private static Regex _stepNextAssemblyUsageOccurrence
+        = new Regex(@"^\(\W*'(?<id>.*)'\W*,\W*'(?<name>.*)'\W*,\W*'(?<description>.*)'\W*,\W*#(?<relatingProd>\d*)\W*,\W*#(?<relatedProd>\d*)\W*,\W*'(?<ref>.*)'\W*\);",
+            RegexOptions.Compiled);
+
+    internal static StepNextAssemblyUsageOccurrence? 
+        TryParseToStepNextAssemblyUsageOccurrence(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepNextAssemblyUsageOccurrence.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepNextAssemblyUsageOccurrence result
+            = new StepNextAssemblyUsageOccurrence(id)
+            {
+                Identifier = match.Groups["id"].Value,
+                Name = match.Groups["name"].Value,
+                Description = match.Groups["description"].Value,
+                RelatingProductDefinition = int.Parse(match.Groups["relatingProd"].Value),
+                RelatedProductDefinition = int.Parse(match.Groups["relatedProd"].Value),
+                ReferenceDesignator = match.Groups["ref"].Value
             };
         return result;
     }

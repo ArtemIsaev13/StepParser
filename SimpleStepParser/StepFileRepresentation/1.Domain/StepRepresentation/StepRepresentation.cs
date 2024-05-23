@@ -16,6 +16,9 @@ internal class StepRepresentation
     internal List<LazyStepEntityContainer<StepRepresentationRelationshipWithTransformation>> 
         StepRepresentationsRelationshipWithTransformation { get; } = new();
 
+    internal List<LazyStepEntityContainer<StepContextDependentShapeRepresentation>>
+        StepContextDependentShapeRepresentations { get; } = new();
+
     #region Lazy
     internal List<LazyStepEntityContainer<StepDirection>> 
         StepDirections { get; } = new();
@@ -25,5 +28,11 @@ internal class StepRepresentation
     
     internal List<LazyStepEntityContainer<StepAxis2Placement3D>> 
         StepAxis2Placements3D { get; } = new();
+
+    internal List<LazyStepEntityContainer<StepProductDefinitionShape>>
+        StepProductDefinitionShapes { get; } = new();
+
+    internal List<LazyStepEntityContainer<StepNextAssemblyUsageOccurrence>>
+        StepNextAssemblyUsageOccurrences { get; } = new();
     #endregion
 }

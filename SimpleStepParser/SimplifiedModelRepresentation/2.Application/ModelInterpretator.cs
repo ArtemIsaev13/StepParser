@@ -2,6 +2,8 @@
 using SimpleStepParser.SimplifiedModelRepresentation._1.Domain;
 using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
 using SimpleStepParser.StepFileRepresentation._1.Domain.StepRepresentation;
+using System.IO.Pipes;
+using System.Reflection;
 
 namespace SimpleStepParser.SimplifiedModelRepresentation._2.Application;
 
@@ -32,7 +34,7 @@ internal static class ModelInterpretator
             List<Model> parents = models[relationship.ParentId];
 
             //Creating models for child
-            Model child = null;
+            Model? child = null;
 
             //If there are another exemplars of child we need to copy some information
             if (models.ContainsKey(relationship.ChildId))
@@ -95,16 +97,26 @@ internal static class ModelInterpretator
         //Adding model if necessary
         Model? model = new ();
         //Finding model name
-        var collection = stepFileRepresentation.StepShapeRepresentations?.Where(f => (f.Id == id));
-        if(collection?.Count() == 1 && collection.FirstOrDefault()?.Value?.Name != null)
+        string name = GetModelNameByShapeRepresentation(id, stepFileRepresentation);
+
+        if(string.IsNullOrEmpty(name))
         {
-            model.Name = collection.First().Value!.Name!;
+            name = "Unnamed model";
         }
-        else
-        {
-            model.Name = "Unnamed model";
-        }
+        model.Name = name;
+
         return model;
+    }
+
+    private static string GetModelNameByShapeRepresentation(int id, StepRepresentation stepFileRepresentation)
+    {
+        string result = string.Empty;
+        var collection = stepFileRepresentation.StepShapeRepresentations?.Where(f => (f.Id == id));
+        if (collection?.Count() == 1 && collection.FirstOrDefault()?.Value?.Name != null)
+        {
+            result = collection.First().Value!.Name!;
+        }
+        return result;
     }
 
     private static CoordinateSystem? GetCoordinateSystem(int id, StepRepresentation stepFileRepresentation)
