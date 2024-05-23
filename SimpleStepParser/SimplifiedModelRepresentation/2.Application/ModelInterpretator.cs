@@ -4,6 +4,7 @@ using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
 using SimpleStepParser.StepFileRepresentation._1.Domain.StepRepresentation;
 using System.IO.Pipes;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace SimpleStepParser.SimplifiedModelRepresentation._2.Application;
 
@@ -57,6 +58,15 @@ internal static class ModelInterpretator
                 models[relationship.ChildId].Add(child);
             }
 
+            if(child != null && string.IsNullOrEmpty(child.Name))
+            {
+                child.Name = GetModelNameByNextAssemblyUsageOccurance(relationship.Id, stepFileRepresentation);
+                if (string.IsNullOrEmpty(child.Name))
+                {
+                    child.Name = "Unnamed model";
+                }
+            }
+
             //Adding CoordinateSystem
             child!.CoordinateSystem = GetCoordinateSystem(relationship.TransformationId, stepFileRepresentation);
 
@@ -97,13 +107,7 @@ internal static class ModelInterpretator
         //Adding model if necessary
         Model? model = new ();
         //Finding model name
-        string name = GetModelNameByShapeRepresentation(id, stepFileRepresentation);
-
-        if(string.IsNullOrEmpty(name))
-        {
-            name = "Unnamed model";
-        }
-        model.Name = name;
+        model.Name = GetModelNameByShapeRepresentation(id, stepFileRepresentation);
 
         return model;
     }
@@ -117,6 +121,58 @@ internal static class ModelInterpretator
             result = collection.First().Value!.Name!;
         }
         return result;
+    }
+
+    private static string GetModelNameByNextAssemblyUsageOccurance(int id, StepRepresentation stepRepresentation)
+    {
+        //finding CONTEXT_DEPENDENT_SHAPE_REPRESENTATION 
+        var collection = stepRepresentation.StepContextDependentShapeRepresentations?.Where(f => (f.Value?.RepresentationRelation == id));
+        //finding PRODUCT_DEFINITION_SHAPE
+        int prodDefShapeId = 0;
+        if (collection?.Count() == 1)
+        {
+            prodDefShapeId = collection.First().Value!.RepresentedProductRelation;
+        }
+        if(prodDefShapeId == 0)
+        {
+            return string.Empty;
+        }
+        var pdsCollection = stepRepresentation.StepProductDefinitionShapes?.Where(s => (s.Id == prodDefShapeId));
+
+        //finding NEXT_ASSEMBLY_USAGE_OCCURRENCE
+        int nextAssUsageOccId = 0;
+        if (pdsCollection?.Count() == 1)
+        {
+            nextAssUsageOccId = pdsCollection.First().Value!.Definition;
+        }
+        if (nextAssUsageOccId == 0)
+        {
+            return string.Empty;
+        }
+        var nauoCollection = stepRepresentation.StepNextAssemblyUsageOccurrences?.Where(o => (o.Id == nextAssUsageOccId));
+
+        //finding name
+        if (nauoCollection?.Count() == 1)
+        {
+            var nextAssUsageOcc = nauoCollection.First().Value;
+            if(nextAssUsageOcc == null)
+            {
+                return string.Empty;
+            }
+            if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Description))
+            {
+                return nextAssUsageOcc.Description;
+            }
+            if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Identifier))
+            {
+                return nextAssUsageOcc.Identifier;
+            }
+            if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Name))
+            {
+                return nextAssUsageOcc.Name;
+            }
+        }
+        return string.Empty;
     }
 
     private static CoordinateSystem? GetCoordinateSystem(int id, StepRepresentation stepFileRepresentation)

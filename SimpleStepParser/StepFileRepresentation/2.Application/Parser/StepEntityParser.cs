@@ -283,7 +283,7 @@ internal static class StepEntityParser
 
 
     private static Regex _stepNextAssemblyUsageOccurrence
-        = new Regex(@"^\(\W*'(?<id>.*)'\W*,\W*'(?<name>.*)'\W*,\W*'(?<description>.*)'\W*,\W*#(?<relatingProd>\d*)\W*,\W*#(?<relatedProd>\d*)\W*,\W*'(?<ref>.*)'\W*\);",
+        = new Regex(@"^\(\W*'(?<id>.*)'\W*,\W*'(?<name>.*)'\W*,\W*'(?<description>.*)'\W*,\W*#(?<relatingProd>\d*)\W*,\W*#(?<relatedProd>\d*)\W*,\W*.*\W*\);",
             RegexOptions.Compiled);
 
     internal static StepNextAssemblyUsageOccurrence? 
@@ -308,7 +308,7 @@ internal static class StepEntityParser
                 Description = match.Groups["description"].Value,
                 RelatingProductDefinition = int.Parse(match.Groups["relatingProd"].Value),
                 RelatedProductDefinition = int.Parse(match.Groups["relatedProd"].Value),
-                ReferenceDesignator = match.Groups["ref"].Value
+                ReferenceDesignator = match.Groups["ref"]?.Value ?? string.Empty
             };
         return result;
     }
