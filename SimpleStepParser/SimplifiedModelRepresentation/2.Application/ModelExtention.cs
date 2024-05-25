@@ -98,7 +98,7 @@ public static class ModelExtention
     private static StringBuilder GetModelTreeRecursive(Model model, int level)
     {
         StringBuilder result = new StringBuilder();
-        result.AppendLine($"{new String('\t', level)}{model.Name}");
+        result.AppendLine($"{new String('\t', level)}+{model.Name}");
         foreach(var child in model.Childs)
         {
             result.Append(GetModelTreeRecursive(child, level+1));

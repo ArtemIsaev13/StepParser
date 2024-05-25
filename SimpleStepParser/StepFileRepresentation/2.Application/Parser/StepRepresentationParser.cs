@@ -1,8 +1,6 @@
 ﻿using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
-using SimpleStepParser.StepFileRepresentation._1.Domain;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Linq;
 using SimpleStepParser.StepFileRepresentation._1.Domain.StepRepresentation;
 using SimpleStepParser.StepFileRepresentation._1.Domain.Enums;
 
@@ -135,7 +133,6 @@ internal static class StepRepresentationParser
                         break;
                     }
                 case "DIRECTION":
-
                     {
                         stepRepresentation.StepDirections!.Add(
                             new LazyStepEntityContainer<StepDirection>(
@@ -143,6 +140,26 @@ internal static class StepRepresentationParser
                                     id,
                                     entityBody,
                                     StepEntityType.DIRECTION)));
+                        break;
+                    }
+                case "PRODUCT_DEFINITION_SHAPE":
+                    {
+                        stepRepresentation.StepProductDefinitionShapes!.Add(
+                          new LazyStepEntityContainer<StepProductDefinitionShape>(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.PRODUCT_DEFINITION_SHAPE)));
+                        break;
+                    }
+                case "NEXT_ASSEMBLY_USAGE_OCCURRENCE":
+                    {
+                        stepRepresentation.StepNextAssemblyUsageOccurrences!.Add(
+                          new LazyStepEntityContainer<StepNextAssemblyUsageOccurrence>(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.NEXT_ASSEMBLY_USAGE_OCCURRENCE)));
                         break;
                     }
                 case "ITEM_DEFINED_TRANSFORMATION":
@@ -184,6 +201,20 @@ internal static class StepRepresentationParser
                                     id,
                                     entityBody,
                                     StepEntityType.SHAPE_REPRESENTATION)));
+                        }
+                        break;
+                    }
+                case "CONTEXT_DEPENDENT_SHAPE_REPRESENTATION":
+                    {
+                        var currentEntity = StepEntityParser.TryParseToStepContextDependentShapeRepresentation(id, entityBody);
+                        if (currentEntity != null)
+                        {
+                            stepRepresentation.StepContextDependentShapeRepresentations!.Add(
+                              new LazyStepEntityContainer<StepContextDependentShapeRepresentation>(
+                                new UninitializedStepEntity(
+                                    id,
+                                    entityBody,
+                                    StepEntityType.CONTEXT_DEPENDENT_SHAPE_REPRESENTATION)));
                         }
                         break;
                     }
