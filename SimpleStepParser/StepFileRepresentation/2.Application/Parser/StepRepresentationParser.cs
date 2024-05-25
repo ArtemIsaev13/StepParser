@@ -1,8 +1,6 @@
 ﻿using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
-using SimpleStepParser.StepFileRepresentation._1.Domain;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Linq;
 using SimpleStepParser.StepFileRepresentation._1.Domain.StepRepresentation;
 using SimpleStepParser.StepFileRepresentation._1.Domain.Enums;
 

@@ -1,4 +1,5 @@
-﻿using MathNet.Spatial.Euclidean;
+﻿using MathNet.Numerics.Distributions;
+using MathNet.Spatial.Euclidean;
 using SimpleStepParser.SimplifiedModelRepresentation._1.Domain;
 using SimpleStepParser.StepFileRepresentation._1.Domain.Entities;
 using SimpleStepParser.StepFileRepresentation._1.Domain.StepRepresentation;
@@ -97,6 +98,11 @@ internal static class ModelInterpretator
                     break;
                 }
             }
+        }
+
+        if (string.IsNullOrEmpty(result.Name))
+        {
+            result.Name = "Unnamed model";
         }
 
         return result;
