@@ -1,11 +1,7 @@
-﻿using MathNet.Numerics.Distributions;
-using MathNet.Spatial.Euclidean;
+﻿using MathNet.Spatial.Euclidean;
 using SimpleStepParser.SimplifiedModelRepresentation.Domain;
 using SimpleStepParser.StepFileRepresentation.Domain.Entities;
 using SimpleStepParser.StepFileRepresentation.Domain.StepRepresentation;
-using System.IO.Pipes;
-using System.Reflection;
-using System.Xml.Linq;
 
 namespace SimpleStepParser.SimplifiedModelRepresentation.Application;
 
@@ -18,7 +14,8 @@ internal static class ModelInterpretator
             return null;
         }
 
-        Dictionary<int, List<Model>> models = new();
+        List<ModelType> modelTypes = new ();
+        List<ModelEntity> modelEntities = new ();
 
         foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation!.Select(v => v.Value))
         {
@@ -27,84 +24,98 @@ internal static class ModelInterpretator
                 continue;
             }
 
-            //Creating models for parent if necessary 
-            if(!models.ContainsKey(relationship.ParentId))
-            {
-                Model parent = GetModel(relationship.ParentId, stepFileRepresentation);
-                models.Add(relationship.ParentId, new() { parent });
-            }
-            List<Model> parents = models[relationship.ParentId];
+            //Creating model type for parent if necessary 
+            ModelType parentModelType = null;
 
-            //Creating models for child
-            Model? child = null;
-
-            //If there are another exemplars of child we need to copy some information
-            if (models.ContainsKey(relationship.ChildId))
+            if(modelTypes.Exists(mt => mt.Id == relationship.ParentId))
             {
-                //If this is parentless model
-                if(models[relationship.ChildId].Count == 1 && models[relationship.ChildId][0].Parent == null)
-                {
-                    child = models[relationship.ChildId][0];
-                }
-                //If the same models already exists
-                else if (models[relationship.ChildId].Count > 0)
-                {
-                    child = models[relationship.ChildId][0].GetDeepCopy();
-                }
+                parentModelType = modelTypes.First(mt => mt.Id == relationship.ParentId);
             }
             else
             {
-                models.Add(relationship.ChildId, new ());
-                child = GetModel(relationship.ChildId, stepFileRepresentation);
-                models[relationship.ChildId].Add(child);
+                parentModelType = GetModelType(relationship.ParentId, stepFileRepresentation);
+                modelTypes.Add(parentModelType);
             }
 
-            if(child != null && string.IsNullOrEmpty(child.Name))
+            //Creating model type for child if necessary 
+            ModelType childModelType = null;
+
+            if (modelTypes.Exists(mt => mt.Id == relationship.ChildId))
             {
-                child.Name = GetModelNameByNextAssemblyUsageOccurance(relationship.Id, stepFileRepresentation);
-                if (string.IsNullOrEmpty(child.Name))
-                {
-                    child.Name = "Unnamed model";
-                }
+                childModelType = modelTypes.First(mt => mt.Id == relationship.ChildId);
             }
-
-            //Adding CoordinateSystem
-            child!.CoordinateSystem = GetCoordinateSystem(relationship.TransformationId, stepFileRepresentation);
-
-            //Adding child to all parents:
-            for(int i = 0; i < parents.Count; i++)
+            else
             {
-                Model currentChild = child;
-                if(i != 0)
+                childModelType = GetModelType(relationship.ChildId, stepFileRepresentation);
+                if (string.IsNullOrEmpty(childModelType.Name))
                 {
-                    currentChild = child.GetDeepCopy();
-                    models[relationship.ChildId].Add(currentChild);
+                    childModelType.Name = GetModelNameByNextAssemblyUsageOccurance(relationship.Id, stepFileRepresentation);
+                    if (string.IsNullOrEmpty(childModelType.Name))
+                    {
+                        childModelType.Name = "Unnamed model";
+                    }
                 }
-                //Adding parent to child
-                currentChild.Parent = parents[i];
-                parents[i].Childs.Add(currentChild);
+                modelTypes.Add(childModelType);
             }
+
+            //Creating model entity for child
+            ModelEntity childModelEntity = new ModelEntity(relationship.Id, childModelType);
+            modelEntities.Add(childModelEntity);
+            childModelEntity.Parent = parentModelType;
+            childModelEntity.CoordinateSystem = GetCoordinateSystem(relationship.TransformationId, stepFileRepresentation);
+
+            parentModelType.Childs.Add(childModelEntity);
         }
 
         //Root it is parentless model
-        Model? result = null;
-        foreach(var modelList in models.Values)
-        {
-            foreach (var model in modelList)
-            {
-                if (model.Parent == null)
-                {
-                    result = model;
-                    break;
-                }
-            }
-        }
+        Model? result = ToModelRoot(modelTypes, modelEntities);
 
         if (string.IsNullOrEmpty(result.Name))
         {
             result.Name = "Unnamed model";
         }
 
+        return result;
+    }
+
+    private static Model ToModelRoot(List<ModelType> modelTypes, List<ModelEntity> modelEntities)
+    {
+        List<ModelType> modelTypesResult = modelTypes.ToList();
+        foreach(var modelType in modelTypes)
+        {
+            foreach (var child in modelType.Childs)
+            {
+                if (modelTypesResult.Contains(child.Type))
+                {
+                    modelTypesResult.Remove(child.Type);
+                }
+            }
+        }
+        if(modelTypesResult.Count != 1)
+        {
+            return new Model();
+        }
+        ModelEntity root = new(0, modelTypesResult[0]);
+        return ToModel(root);
+    }
+
+    private static Model ToModel(ModelEntity modelEntity)
+    {
+        Model result = new() 
+        {
+            CoordinateSystem = modelEntity.CoordinateSystem,
+            Name = modelEntity.Type.Name,
+        };
+
+        List<Model> resultChilds = new ();
+        foreach(var child in modelEntity.Type.Childs)
+        {
+            var newChild = ToModel(child);
+            newChild.Parent = result;
+            resultChilds.Add(newChild);
+        }
+
+        result.Childs.AddRange(resultChilds);
         return result;
     }
 
@@ -115,6 +126,15 @@ internal static class ModelInterpretator
         //Finding model name
         model.Name = GetModelNameByShapeRepresentation(id, stepFileRepresentation);
 
+        return model;
+    }
+
+    private static ModelType GetModelType(int id, StepRepresentation stepFileRepresentation)
+    {
+        ModelType model = new(id);
+        //Finding model name
+        model.Name = GetModelNameByShapeRepresentation(id, stepFileRepresentation);
+        
         return model;
     }
 

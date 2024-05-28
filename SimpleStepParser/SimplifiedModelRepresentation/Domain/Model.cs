@@ -5,7 +5,7 @@ namespace SimpleStepParser.SimplifiedModelRepresentation.Domain;
 public class Model
 {
     public string? Name { get; set; }
-    public List<Model> Childs { get; } = new List<Model>();
+    public List<Model> Childs { get; } = new ();
     public Model? Parent { get; set; }
     public CoordinateSystem? CoordinateSystem { get; set; }
 
