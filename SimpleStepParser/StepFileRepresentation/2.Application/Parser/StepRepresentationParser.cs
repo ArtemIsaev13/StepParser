@@ -97,6 +97,7 @@ internal static class StepRepresentationParser
 
             //Does the command have one line or many lines?
             string entity = entitySb == null ? stepFile[i] : entitySb.ToString();
+            entity = DeleteWhiteSpaces(entity);
 
             var m = entityStart.Match(entity);
             if (!m.Success)
@@ -222,5 +223,41 @@ internal static class StepRepresentationParser
         }
 
         return stepRepresentation;
+    }
+
+    private static string DeleteWhiteSpaces(string entity)
+    {
+        if(entity.Contains('\''))
+        {
+            if (entity.Contains(' '))
+            {
+                StringBuilder sb = new StringBuilder();
+                string[] groups = entity.Split('\'');
+                for(int i = 0; i < groups.Count(); i++)
+                {
+                    if(i%2 == 0)
+                    {
+                        sb.Append(groups[i].Replace(" ", ""));
+                    }
+                    else
+                    {
+                        sb.Append(groups[i]);
+                    }
+                    if (i != groups.Count() - 1)
+                    {
+                        sb.Append("'");
+                    }
+                }
+                entity = sb.ToString();
+            }
+        }
+        else
+        {
+            if (entity.Contains(' ')) 
+            {
+                entity = entity.Replace(" ", "");
+            }
+        }
+        return entity;
     }
 }
