@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using SimpleStepParser.SimplifiedModelRepresentation._1.Domain;
-using SimpleStepParser.SimplifiedModelRepresentation._2.Application;
+using SimpleStepParser.SimplifiedModelRepresentation.Domain;
+using SimpleStepParser.SimplifiedModelRepresentation.Application;
 using System.Diagnostics;
 
 Console.WriteLine("Hello, World!");

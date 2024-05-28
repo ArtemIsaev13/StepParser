@@ -1,8 +1,8 @@
-﻿using SimpleStepParser.PostProcessing._2.Application;
-using SimpleStepParser.SimplifiedModelRepresentation._1.Domain;
-using SimpleStepParser.SimplifiedModelRepresentation._2.Application;
-using SimpleStepParser.StepFileRepresentation._1.Domain.StepRepresentation;
-using SimpleStepParser.StepFileRepresentation._2.Application.Parser;
+﻿using SimpleStepParser.PostProcessing.Application;
+using SimpleStepParser.SimplifiedModelRepresentation.Domain;
+using SimpleStepParser.SimplifiedModelRepresentation.Application;
+using SimpleStepParser.StepFileRepresentation.Domain.StepRepresentation;
+using SimpleStepParser.StepFileRepresentation.Application.Parser;
 using System.Text;
 
 namespace SimpleStepParser
