@@ -57,7 +57,7 @@ internal static class StepEntityParser
                     break;
                 }
         }
-        return (result == null);
+        return (result != null);
     }
 
     private static readonly Regex _stepDirectionRegex

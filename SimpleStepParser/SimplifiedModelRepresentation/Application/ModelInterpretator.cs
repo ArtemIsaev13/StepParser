@@ -17,7 +17,10 @@ internal static class ModelInterpretator
         List<ModelType> modelTypes = new ();
         List<ModelEntity> modelEntities = new ();
 
-        foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation.GetAll())
+        List<StepRepresentationRelationshipWithTransformation> relationships 
+            = stepFileRepresentation.StepRepresentationsRelationshipWithTransformation.GetAll();
+
+        foreach (var relationship in relationships)
         {
             if(relationship == null)
             {

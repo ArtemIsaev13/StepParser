@@ -17,7 +17,12 @@ internal class StepEntityStorage<T> where T : AbstractStepEntity
         }
         else if(_rawData.Exists(en => en.Id == id))
         {
-            return Parse(_rawData.First(en => en.Id == id));
+            var entity = Parse(_rawData.First(en => en.Id == id));
+            if (entity != null)
+            {
+                _parsedData.Add(entity);
+            }
+            return entity;
         }
         return null;
     }
@@ -26,7 +31,7 @@ internal class StepEntityStorage<T> where T : AbstractStepEntity
     {
         foreach(var rawDatum in _rawData)
         {
-            if(_parsedData.Exists(en => en.Id == rawDatum.Id))
+            if(!_parsedData.Exists(en => en.Id == rawDatum.Id))
             {
                 T newEntity = GetEntity(rawDatum.Id);
                 if (newEntity != null)
@@ -45,7 +50,9 @@ internal class StepEntityStorage<T> where T : AbstractStepEntity
 
     private T? Parse(UninitializedStepEntity uninitializedStepEntity)
     {
-        if(StepEntityParser.TryParse(uninitializedStepEntity, out var result))
+        var wasParsed = StepEntityParser.TryParse(uninitializedStepEntity, out var result);
+
+        if (wasParsed)
         {
             return result as T;
         }
