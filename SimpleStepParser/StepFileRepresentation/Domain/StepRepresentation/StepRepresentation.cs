@@ -1,38 +1,39 @@
-﻿using SimpleStepParser.StepFileRepresentation.Domain.Entities;
+﻿using SimpleStepParser.StepFileRepresentation.Application;
+using SimpleStepParser.StepFileRepresentation.Domain.Entities;
 
 namespace SimpleStepParser.StepFileRepresentation.Domain.StepRepresentation;
 
 internal class StepRepresentation
 {
     internal string? Header { get; init; }
-    internal List<UndefinedStepEntity> UndefinedStepEntities { get; } = new();
+
+    internal StepEntityStorage<UndefinedStepEntity> 
+        UndefinedStepEntities { get; } = new();
     
-    internal List<LazyStepEntityContainer<StepItemDefinedTransformation>> 
+    internal StepEntityStorage<StepItemDefinedTransformation> 
         StepItemDefinedTransformations { get; } = new();
     
-    internal List<LazyStepEntityContainer<StepShapeRepresentation>> 
+    internal StepEntityStorage<StepShapeRepresentation> 
         StepShapeRepresentations { get; } = new();
     
-    internal List<LazyStepEntityContainer<StepRepresentationRelationshipWithTransformation>> 
+    internal StepEntityStorage<StepRepresentationRelationshipWithTransformation> 
         StepRepresentationsRelationshipWithTransformation { get; } = new();
 
-    internal List<LazyStepEntityContainer<StepContextDependentShapeRepresentation>>
+    internal StepEntityStorage<StepContextDependentShapeRepresentation>
         StepContextDependentShapeRepresentations { get; } = new();
 
-    #region Lazy
-    internal List<LazyStepEntityContainer<StepDirection>> 
+    internal StepEntityStorage<StepDirection> 
         StepDirections { get; } = new();
     
-    internal List<LazyStepEntityContainer<StepCartesianPoint>> 
+    internal StepEntityStorage<StepCartesianPoint> 
         StepCartesianPoints { get; } = new();
     
-    internal List<LazyStepEntityContainer<StepAxis2Placement3D>> 
+    internal StepEntityStorage<StepAxis2Placement3D> 
         StepAxis2Placements3D { get; } = new();
 
-    internal List<LazyStepEntityContainer<StepProductDefinitionShape>>
+    internal StepEntityStorage<StepProductDefinitionShape>
         StepProductDefinitionShapes { get; } = new();
 
-    internal List<LazyStepEntityContainer<StepNextAssemblyUsageOccurrence>>
+    internal StepEntityStorage<StepNextAssemblyUsageOccurrence>
         StepNextAssemblyUsageOccurrences { get; } = new();
-    #endregion
 }

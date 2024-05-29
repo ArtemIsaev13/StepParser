@@ -17,7 +17,7 @@ internal static class ModelInterpretator
         List<ModelType> modelTypes = new ();
         List<ModelEntity> modelEntities = new ();
 
-        foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation!.Select(v => v.Value))
+        foreach(var relationship in stepFileRepresentation.StepRepresentationsRelationshipWithTransformation.GetAll())
         {
             if(relationship == null)
             {
@@ -141,10 +141,10 @@ internal static class ModelInterpretator
     private static string GetModelNameByShapeRepresentation(int id, StepRepresentation stepFileRepresentation)
     {
         string result = string.Empty;
-        var collection = stepFileRepresentation.StepShapeRepresentations?.Where(f => (f.Id == id));
-        if (collection?.Count() == 1 && collection.FirstOrDefault()?.Value?.Name != null)
+        var entity = stepFileRepresentation.StepShapeRepresentations.GetEntity(id);
+        if (entity != null && entity.Name != null)
         {
-            result = collection.First().Value!.Name!;
+            result = entity.Name!;
         }
         return result;
     }
@@ -152,52 +152,44 @@ internal static class ModelInterpretator
     private static string GetModelNameByNextAssemblyUsageOccurance(int id, StepRepresentation stepRepresentation)
     {
         //finding CONTEXT_DEPENDENT_SHAPE_REPRESENTATION 
-        var collection = stepRepresentation.StepContextDependentShapeRepresentations?.Where(f => (f.Value?.RepresentationRelation == id));
+        var shapeRepr = stepRepresentation.StepContextDependentShapeRepresentations.GetEntity(id);
         //finding PRODUCT_DEFINITION_SHAPE
-        int prodDefShapeId = 0;
-        if (collection?.Count() == 1)
-        {
-            prodDefShapeId = collection.First().Value!.RepresentedProductRelation;
-        }
+        int prodDefShapeId = shapeRepr?.RepresentedProductRelation ?? 0;
         if(prodDefShapeId == 0)
         {
             return string.Empty;
         }
-        var pdsCollection = stepRepresentation.StepProductDefinitionShapes?.Where(s => (s.Id == prodDefShapeId));
+
+        var pdsCollection = stepRepresentation.StepProductDefinitionShapes?.GetEntity(prodDefShapeId);
 
         //finding NEXT_ASSEMBLY_USAGE_OCCURRENCE
-        int nextAssUsageOccId = 0;
-        if (pdsCollection?.Count() == 1)
-        {
-            nextAssUsageOccId = pdsCollection.First().Value!.Definition;
-        }
+        int nextAssUsageOccId = pdsCollection?.Id ?? 0;
         if (nextAssUsageOccId == 0)
         {
             return string.Empty;
         }
-        var nauoCollection = stepRepresentation.StepNextAssemblyUsageOccurrences?.Where(o => (o.Id == nextAssUsageOccId));
+
+        var nextAssUsageOcc = stepRepresentation
+            .StepNextAssemblyUsageOccurrences?.GetEntity(nextAssUsageOccId);
 
         //finding name
-        if (nauoCollection?.Count() == 1)
+        if (nextAssUsageOcc == null)
         {
-            var nextAssUsageOcc = nauoCollection.First().Value;
-            if(nextAssUsageOcc == null)
-            {
-                return string.Empty;
-            }
-            if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Description))
-            {
-                return nextAssUsageOcc.Description;
-            }
-            if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Identifier))
-            {
-                return nextAssUsageOcc.Identifier;
-            }
-            if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Name))
-            {
-                return nextAssUsageOcc.Name;
-            }
+            return string.Empty;
         }
+        if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Description))
+        {
+            return nextAssUsageOcc.Description;
+        }
+        if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Identifier))
+        {
+            return nextAssUsageOcc.Identifier;
+        }
+        if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Name))
+        {
+            return nextAssUsageOcc.Name;
+        }
+
         return string.Empty;
     }
 
@@ -206,14 +198,15 @@ internal static class ModelInterpretator
         // Оnly child CS is matter by some reason
         int currentCsId = 
             stepFileRepresentation.StepItemDefinedTransformations!
-            .Find(s => s.Id == id)?.Value?.ChildId ?? 0;
+            .GetEntity(id)?.ChildId ?? 0;
         if (currentCsId == 0)
         {
             return null;
         }
 
         StepAxis2Placement3D? currentStepAxis2Placement3D
-            = stepFileRepresentation.StepAxis2Placements3D!.Find(s => (s.Id == currentCsId))?.Value;
+            = stepFileRepresentation.StepAxis2Placements3D!
+            .GetEntity(currentCsId);
 
         if(currentStepAxis2Placement3D == null)
         {
@@ -222,15 +215,15 @@ internal static class ModelInterpretator
 
         StepDirection? axisZ 
             = stepFileRepresentation.StepDirections!
-            .First(s => (s.Id == currentStepAxis2Placement3D.ZAxisId)).Value;
+            .GetEntity(currentStepAxis2Placement3D.ZAxisId);
 
         StepDirection? axisX
             = stepFileRepresentation.StepDirections!
-            .First(s => (s.Id == currentStepAxis2Placement3D.XAxisId)).Value;
+            .GetEntity(currentStepAxis2Placement3D.XAxisId);
         
         StepCartesianPoint? origin
             = stepFileRepresentation.StepCartesianPoints!
-            .First(s => (s.Id == currentStepAxis2Placement3D.LocationPointId)).Value;
+            .GetEntity(currentStepAxis2Placement3D.LocationPointId);
         
         if (axisZ == null ||
             axisX == null ||

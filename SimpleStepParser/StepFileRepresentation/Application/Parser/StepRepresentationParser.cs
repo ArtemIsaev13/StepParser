@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using SimpleStepParser.StepFileRepresentation.Domain.StepRepresentation;
 using SimpleStepParser.StepFileRepresentation.Domain.Enums;
+using SimpleStepParser.StepFileRepresentation.Domain.Exceptions;
 
 namespace SimpleStepParser.StepFileRepresentation.Application.Parser;
 
@@ -102,8 +103,7 @@ internal static class StepRepresentationParser
             var m = entityStart.Match(entity);
             if (!m.Success)
             {
-                //TODO: add new Exception class
-                throw new Exception("Error during parsing");
+                throw new UnableToParseStepEntityException();
             }
 
             int id = int.Parse(m.Groups["id"].Value);
@@ -115,108 +115,84 @@ internal static class StepRepresentationParser
                 case "CARTESIAN_POINT":
                     {
                         //TODO: double type identification
-                        stepRepresentation.StepCartesianPoints!.Add(
-                            new LazyStepEntityContainer<StepCartesianPoint>(
+                        stepRepresentation.StepCartesianPoints!.AddEntity(
                                 new UninitializedStepEntity(
                                     id, 
                                     entityBody, 
-                                    StepEntityType.CARTESIAN_POINT)));
+                                    StepEntityType.CARTESIAN_POINT));
                         break;
                     }
                 case "AXIS2_PLACEMENT_3D":
                     {
-                        stepRepresentation.StepAxis2Placements3D!.Add(
-                            new LazyStepEntityContainer<StepAxis2Placement3D>(
+                        stepRepresentation.StepAxis2Placements3D!.AddEntity(
                                 new UninitializedStepEntity(
                                     id,
                                     entityBody,
-                                    StepEntityType.AXIS2_PLACEMENT_3D)));
+                                    StepEntityType.AXIS2_PLACEMENT_3D));
                         break;
                     }
                 case "DIRECTION":
                     {
-                        stepRepresentation.StepDirections!.Add(
-                            new LazyStepEntityContainer<StepDirection>(
+                        stepRepresentation.StepDirections!.AddEntity(
                                 new UninitializedStepEntity(
                                     id,
                                     entityBody,
-                                    StepEntityType.DIRECTION)));
+                                    StepEntityType.DIRECTION));
                         break;
                     }
                 case "PRODUCT_DEFINITION_SHAPE":
                     {
-                        stepRepresentation.StepProductDefinitionShapes!.Add(
-                          new LazyStepEntityContainer<StepProductDefinitionShape>(
+                        stepRepresentation.StepProductDefinitionShapes!.AddEntity(
                             new UninitializedStepEntity(
                                 id,
                                 entityBody,
-                                StepEntityType.PRODUCT_DEFINITION_SHAPE)));
+                                StepEntityType.PRODUCT_DEFINITION_SHAPE));
                         break;
                     }
                 case "NEXT_ASSEMBLY_USAGE_OCCURRENCE":
                     {
-                        stepRepresentation.StepNextAssemblyUsageOccurrences!.Add(
-                          new LazyStepEntityContainer<StepNextAssemblyUsageOccurrence>(
+                        stepRepresentation.StepNextAssemblyUsageOccurrences!.AddEntity(
                             new UninitializedStepEntity(
                                 id,
                                 entityBody,
-                                StepEntityType.NEXT_ASSEMBLY_USAGE_OCCURRENCE)));
+                                StepEntityType.NEXT_ASSEMBLY_USAGE_OCCURRENCE));
                         break;
                     }
                 case "ITEM_DEFINED_TRANSFORMATION":
                     {
-                        var currentEntity = StepEntityParser.TryParseToStepItemDefinedTransformation(id, entityBody);
-                        if (currentEntity != null)
-                        {
-                            stepRepresentation.StepItemDefinedTransformations!.Add(
-                              new LazyStepEntityContainer<StepItemDefinedTransformation>(
-                                new UninitializedStepEntity(
-                                    id,
-                                    entityBody,
-                                    StepEntityType.ITEM_DEFINED_TRANSFORMATION)));
-                        }
+                        stepRepresentation.StepItemDefinedTransformations!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.ITEM_DEFINED_TRANSFORMATION));
+
                         break;
                     }
                 case "REPRESENTATION_RELATIONSHIP":
                     {
-                        var currentEntity = StepEntityParser.TryParseToStepRepresentationRelationshipWithTransformation(id, entityBody);
-                        if (currentEntity != null)
-                        {
-                            stepRepresentation.StepRepresentationsRelationshipWithTransformation!.Add(
-                            new LazyStepEntityContainer<StepRepresentationRelationshipWithTransformation>(
-                                new UninitializedStepEntity(
-                                    id,
-                                    entityBody,
-                                    StepEntityType.REPRESENTATION_RELATIONSHIP)));
-                        }
+                        stepRepresentation.StepRepresentationsRelationshipWithTransformation!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.REPRESENTATION_RELATIONSHIP));
                         break;
                     }
                 case "SHAPE_REPRESENTATION":
                     {
-                        var currentEntity = StepEntityParser.TryParseToStepShapeRepresentation(id, entityBody);
-                        if (currentEntity != null)
-                        {
-                            stepRepresentation.StepShapeRepresentations!.Add(
-                              new LazyStepEntityContainer<StepShapeRepresentation>(
-                                new UninitializedStepEntity(
-                                    id,
-                                    entityBody,
-                                    StepEntityType.SHAPE_REPRESENTATION)));
-                        }
+                        stepRepresentation.StepShapeRepresentations!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.SHAPE_REPRESENTATION));
                         break;
                     }
                 case "CONTEXT_DEPENDENT_SHAPE_REPRESENTATION":
                     {
-                        var currentEntity = StepEntityParser.TryParseToStepContextDependentShapeRepresentation(id, entityBody);
-                        if (currentEntity != null)
-                        {
-                            stepRepresentation.StepContextDependentShapeRepresentations!.Add(
-                              new LazyStepEntityContainer<StepContextDependentShapeRepresentation>(
-                                new UninitializedStepEntity(
-                                    id,
-                                    entityBody,
-                                    StepEntityType.CONTEXT_DEPENDENT_SHAPE_REPRESENTATION)));
-                        }
+                        stepRepresentation.StepContextDependentShapeRepresentations!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.CONTEXT_DEPENDENT_SHAPE_REPRESENTATION));
                         break;
                     }
             }
