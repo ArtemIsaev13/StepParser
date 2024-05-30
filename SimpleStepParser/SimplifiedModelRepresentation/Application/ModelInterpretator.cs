@@ -50,15 +50,16 @@ internal static class ModelInterpretator
             else
             {
                 childModelType = GetModelType(relationship.ChildId, stepFileRepresentation);
+                modelTypes.Add(childModelType);
+            }
+
+            if (string.IsNullOrEmpty(childModelType.Name))
+            {
+                childModelType.Name = GetModelNameByNextAssemblyUsageOccurance(relationship.Id, stepFileRepresentation);
                 if (string.IsNullOrEmpty(childModelType.Name))
                 {
-                    childModelType.Name = GetModelNameByNextAssemblyUsageOccurance(relationship.Id, stepFileRepresentation);
-                    if (string.IsNullOrEmpty(childModelType.Name))
-                    {
-                        childModelType.Name = "Unnamed model";
-                    }
+                    childModelType.Name = "Unnamed model";
                 }
-                modelTypes.Add(childModelType);
             }
 
             //Creating model entity for child
@@ -155,7 +156,9 @@ internal static class ModelInterpretator
     private static string GetModelNameByNextAssemblyUsageOccurance(int id, StepRepresentation stepRepresentation)
     {
         //finding CONTEXT_DEPENDENT_SHAPE_REPRESENTATION 
-        var shapeRepr = stepRepresentation.StepContextDependentShapeRepresentations.GetEntity(id);
+        var shapeReprs = stepRepresentation.StepContextDependentShapeRepresentations.GetAll();
+        var shapeRepr = shapeReprs.Find(sh => sh.RepresentationRelation == id);
+
         //finding PRODUCT_DEFINITION_SHAPE
         int prodDefShapeId = shapeRepr?.RepresentedProductRelation ?? 0;
         if(prodDefShapeId == 0)
@@ -163,10 +166,10 @@ internal static class ModelInterpretator
             return string.Empty;
         }
 
-        var pdsCollection = stepRepresentation.StepProductDefinitionShapes?.GetEntity(prodDefShapeId);
+        var prodDefShape = stepRepresentation.StepProductDefinitionShapes?.GetEntity(prodDefShapeId);
 
         //finding NEXT_ASSEMBLY_USAGE_OCCURRENCE
-        int nextAssUsageOccId = pdsCollection?.Id ?? 0;
+        int nextAssUsageOccId = prodDefShape?.Definition ?? 0;
         if (nextAssUsageOccId == 0)
         {
             return string.Empty;
