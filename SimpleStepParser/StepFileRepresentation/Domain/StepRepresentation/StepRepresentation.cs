@@ -36,4 +36,16 @@ internal class StepRepresentation
 
     internal StepEntityStorage<StepNextAssemblyUsageOccurrence>
         StepNextAssemblyUsageOccurrences { get; } = new();
+
+    internal StepEntityStorage<StepShapeDefinitionRepresentation>
+        StepShapeDefinitionRepresentations { get; } = new();
+
+    internal StepEntityStorage<StepProductDefinition>
+        StepProductDefinitions { get; } = new();
+
+    internal StepEntityStorage<StepProductDefinitionFormationWithSpecifiedSource>
+        StepProductDefinitionFormationWithSpecifiedSources { get; } = new();
+
+    internal StepEntityStorage<StepProduct>
+        StepProducts { get; } = new();
 }

@@ -312,4 +312,34 @@ internal static class StepEntityParser
             };
         return result;
     }
+
+
+    private static Regex _stepShapeDefinitionRepresentation
+    = new Regex(@"^\(#(?<def>.*),#(?<rep>\d*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepShapeDefinitionRepresentation?
+        TryParseToStepShapeDefinitionRepresentation(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepShapeDefinitionRepresentation.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepShapeDefinitionRepresentation result
+            = new StepShapeDefinitionRepresentation(id)
+            {
+                Definition = int.Parse(match.Groups["def"].Value),
+                UsedRepresentation = int.Parse(match.Groups["rep"].Value)
+            };
+        return result;
+    }
+
+
 }

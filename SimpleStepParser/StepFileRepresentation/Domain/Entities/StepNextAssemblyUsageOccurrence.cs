@@ -9,15 +9,15 @@ internal class StepNextAssemblyUsageOccurrence : AbstractStepEntity
     {
     }
 
-    public string Identifier = string.Empty;
+    public string? Identifier { get; init; }
 
-    public string Name = string.Empty;
+    public string? Name { get; init; }
 
-    public string Description = string.Empty;
+    public string? Description { get; init; }
 
-    public int RelatingProductDefinition;
+    public int RelatingProductDefinition { get; init; }
 
-    public int RelatedProductDefinition;
+    public int RelatedProductDefinition { get; init; }
 
-    public string ReferenceDesignator = string.Empty;
+    public string? ReferenceDesignator { get; init; }
 }
