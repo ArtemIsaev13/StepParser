@@ -34,10 +34,6 @@ internal class StepEntityStorage<T> where T : AbstractStepEntity
             if(!_parsedData.Exists(en => en.Id == rawDatum.Id))
             {
                 T newEntity = GetEntity(rawDatum.Id);
-                if (newEntity != null)
-                {
-                    _parsedData.Add(newEntity);
-                }
             }
         }
         return _parsedData.ToList();
