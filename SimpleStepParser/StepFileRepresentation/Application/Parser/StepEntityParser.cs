@@ -56,6 +56,26 @@ internal static class StepEntityParser
                     result = TryParseToStepNextAssemblyUsageOccurrence(from.Id, from.Body);
                     break;
                 }
+            case StepEntityType.SHAPE_DEFINITION_REPRESENTATION:
+                {
+                    result = TryParseToStepShapeDefinitionRepresentation(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.PRODUCT_DEFINITION:
+                {
+                    result = TryParseToStepProductDefinition(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE:
+                {
+                    result = TryParseToStepProductDefinitionFormationWithSpecifiedSource(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.PRODUCT:
+                {
+                    result = TryParseToStepProduct(from.Id, from.Body);
+                    break;
+                }
         }
         return (result != null);
     }
@@ -342,4 +362,92 @@ internal static class StepEntityParser
     }
 
 
+    private static Regex _stepProductDefinition
+    = new Regex(@"^\('(?<iden>.*)','(?<descr>.*)',#(?<formation>\d*),#(?<frOfRef>\d*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepProductDefinition?
+        TryParseToStepProductDefinition(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepProductDefinition.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepProductDefinition result
+            = new StepProductDefinition(id)
+            {
+                Identifier = match.Groups["iden"].Value,
+                Description = match.Groups["descr"].Value,
+                Formation = int.Parse(match.Groups["formation"].Value),
+                FrameOfReference = int.Parse(match.Groups["frOfRef"].Value)
+            };
+        return result;
+    }
+
+
+    private static Regex _stepProductDefinitionFormationWithSpecifiedSource
+    = new Regex(@"^\('(?<iden>.*)','(?<descr>.*)',#(?<ofProduct>\d*),(?<makeOrBuy>.*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepProductDefinitionFormationWithSpecifiedSource?
+        TryParseToStepProductDefinitionFormationWithSpecifiedSource(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepProductDefinitionFormationWithSpecifiedSource.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepProductDefinitionFormationWithSpecifiedSource result
+            = new StepProductDefinitionFormationWithSpecifiedSource(id)
+            {
+                Identifier = match.Groups["iden"].Value,
+                Description = match.Groups["descr"].Value,
+                OfProduct = int.Parse(match.Groups["ofProduct"].Value),
+                MakeOrBuy = match.Groups["makeOrBuy"].Value,
+            };
+        return result;
+    }
+
+
+    private static Regex _stepProduct
+    = new Regex(@"^\('(?<iden>.*)','(?<name>.*)','(?<descr>.*)',(?<frOfRef>.*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepProduct?
+        TryParseToStepProduct(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepProduct.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepProduct result
+            = new StepProduct(id)
+            {
+                Identifier = match.Groups["iden"].Value,
+                Name = match.Groups["name"].Value,
+                Description = match.Groups["descr"].Value,
+                FrameOfReference = match.Groups["frOfRef"].Value,
+            };
+        return result;
+    }
 }
