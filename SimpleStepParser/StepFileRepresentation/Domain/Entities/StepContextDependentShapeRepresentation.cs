@@ -9,7 +9,7 @@ internal class StepContextDependentShapeRepresentation : AbstractStepEntity
     {
     }
 
-    public int RepresentationRelation;
+    public int RepresentationRelation {  get; init; }
 
-    public int RepresentedProductRelation;
+    public int RepresentedProductRelation { get; init; }
 }

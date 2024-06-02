@@ -53,15 +53,6 @@ internal static class ModelInterpretator
                 modelTypes.Add(childModelType);
             }
 
-            if (string.IsNullOrEmpty(childModelType.Name))
-            {
-                childModelType.Name = GetModelNameByNextAssemblyUsageOccurance(relationship.Id, stepFileRepresentation);
-                if (string.IsNullOrEmpty(childModelType.Name))
-                {
-                    childModelType.Name = "Unnamed model";
-                }
-            }
-
             //Creating model entity for child
             ModelEntity childModelEntity = new ModelEntity(relationship.Id, childModelType);
             modelEntities.Add(childModelEntity);
@@ -73,11 +64,6 @@ internal static class ModelInterpretator
 
         //Root it is parentless model
         Model? result = ToModelRoot(modelTypes, modelEntities);
-
-        if (string.IsNullOrEmpty(result.Name))
-        {
-            result.Name = "Unnamed model";
-        }
 
         return result;
     }
@@ -123,80 +109,73 @@ internal static class ModelInterpretator
         return result;
     }
 
-    private static Model GetModel(int id, StepRepresentation stepFileRepresentation)
-    {
-        //Adding model if necessary
-        Model? model = new ();
-        //Finding model name
-        model.Name = GetModelNameByShapeRepresentation(id, stepFileRepresentation);
-
-        return model;
-    }
-
     private static ModelType GetModelType(int id, StepRepresentation stepFileRepresentation)
     {
         ModelType model = new(id);
         //Finding model name
-        model.Name = GetModelNameByShapeRepresentation(id, stepFileRepresentation);
-        
+        model.Name = GetModelNameByProduct(id, stepFileRepresentation);
+
         return model;
     }
 
-    private static string GetModelNameByShapeRepresentation(int id, StepRepresentation stepFileRepresentation)
+    private static string GetModelNameByProduct(int shapeRepresentationId, StepRepresentation stepRepresentation)
     {
-        string result = string.Empty;
-        var entity = stepFileRepresentation.StepShapeRepresentations.GetEntity(id);
-        if (entity != null && entity.Name != null)
-        {
-            result = entity.Name!;
-        }
-        return result;
-    }
-
-    private static string GetModelNameByNextAssemblyUsageOccurance(int id, StepRepresentation stepRepresentation)
-    {
-        //finding CONTEXT_DEPENDENT_SHAPE_REPRESENTATION 
-        var shapeReprs = stepRepresentation.StepContextDependentShapeRepresentations.GetAll();
-        var shapeRepr = shapeReprs.Find(sh => sh.RepresentationRelation == id);
-
-        //finding PRODUCT_DEFINITION_SHAPE
-        int prodDefShapeId = shapeRepr?.RepresentedProductRelation ?? 0;
-        if(prodDefShapeId == 0)
+        List<StepShapeDefinitionRepresentation> allShapeRepresentation 
+            = stepRepresentation.StepShapeDefinitionRepresentations.GetAll();
+        if(!allShapeRepresentation
+            .Any(sr => sr.UsedRepresentation == shapeRepresentationId))
         {
             return string.Empty;
         }
 
-        var prodDefShape = stepRepresentation.StepProductDefinitionShapes?.GetEntity(prodDefShapeId);
-
-        //finding NEXT_ASSEMBLY_USAGE_OCCURRENCE
-        int nextAssUsageOccId = prodDefShape?.Definition ?? 0;
-        if (nextAssUsageOccId == 0)
+        int properProductDefinitionShapeId 
+            = allShapeRepresentation
+            .Find(sr => sr.UsedRepresentation == shapeRepresentationId)?
+            .Definition ?? 0;
+        if(properProductDefinitionShapeId == 0)
         {
             return string.Empty;
         }
 
-        var nextAssUsageOcc = stepRepresentation
-            .StepNextAssemblyUsageOccurrences?.GetEntity(nextAssUsageOccId);
-
-        //finding name
-        if (nextAssUsageOcc == null)
+        int properProductDefinitionId 
+            = stepRepresentation
+            .StepProductDefinitionShapes
+            .GetEntity(properProductDefinitionShapeId)?.Definition ?? 0;
+        if(properProductDefinitionId == 0)
         {
             return string.Empty;
         }
-        if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Description))
+
+        int prodDefFormWithSpecSource 
+            = stepRepresentation
+            .StepProductDefinitions
+            .GetEntity(properProductDefinitionId)?
+            .Formation ?? 0;
+        if(prodDefFormWithSpecSource == 0)
         {
-            return nextAssUsageOcc.Description;
-        }
-        if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Identifier))
-        {
-            return nextAssUsageOcc.Identifier;
-        }
-        if (!string.IsNullOrWhiteSpace(nextAssUsageOcc.Name))
-        {
-            return nextAssUsageOcc.Name;
+            return string.Empty;
         }
 
-        return string.Empty;
+        int properProdId 
+            = stepRepresentation
+            .StepProductDefinitionFormationWithSpecifiedSources
+            .GetEntity(prodDefFormWithSpecSource)?.OfProduct ?? 0;
+        if(properProdId == 0)
+        {
+            return string.Empty;
+        }
+
+        string name 
+            = stepRepresentation
+            .StepProducts.GetEntity(properProdId)?
+            .Name ?? string.Empty;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            name = "Unnamed model";
+        }
+
+        return name;
     }
 
     private static CoordinateSystem? GetCoordinateSystem(int id, StepRepresentation stepFileRepresentation)

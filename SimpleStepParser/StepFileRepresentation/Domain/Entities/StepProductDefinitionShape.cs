@@ -9,9 +9,9 @@ internal class StepProductDefinitionShape : AbstractStepEntity
     {
     }
 
-    public string Name = string.Empty;
+    public string? Name { get; init; }
 
-    public string? Description = string.Empty;
+    public string? Description { get; init; }
 
-    public int Definition;
+    public int Definition { get; init; }
 }

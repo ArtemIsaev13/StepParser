@@ -91,11 +91,6 @@ internal static class StepRepresentationParser
                 }
             }
 
-            if(endOfFile)
-            {
-                break;
-            }
-
             //Does the command have one line or many lines?
             string entity = entitySb == null ? stepFile[i] : entitySb.ToString();
             entity = DeleteWhiteSpaces(entity);
@@ -114,7 +109,6 @@ internal static class StepRepresentationParser
             {
                 case "CARTESIAN_POINT":
                     {
-                        //TODO: double type identification
                         stepRepresentation.StepCartesianPoints!.AddEntity(
                                 new UninitializedStepEntity(
                                     id, 
@@ -195,6 +189,47 @@ internal static class StepRepresentationParser
                                 StepEntityType.CONTEXT_DEPENDENT_SHAPE_REPRESENTATION));
                         break;
                     }
+                case "SHAPE_DEFINITION_REPRESENTATION":
+                    {
+                        stepRepresentation.StepShapeDefinitionRepresentations!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.SHAPE_DEFINITION_REPRESENTATION));
+                        break;
+                    }
+                case "PRODUCT_DEFINITION":
+                    {
+                        stepRepresentation.StepProductDefinitions!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.PRODUCT_DEFINITION));
+                        break;
+                    }
+                case "PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE":
+                    {
+                        stepRepresentation.StepProductDefinitionFormationWithSpecifiedSources!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE));
+                        break;
+                    }
+                case "PRODUCT":
+                    {
+                        stepRepresentation.StepProducts!.AddEntity(
+                            new UninitializedStepEntity(
+                                id,
+                                entityBody,
+                                StepEntityType.PRODUCT));
+                        break;
+                    }
+            }
+
+            if (endOfFile)
+            {
+                break;
             }
         }
 

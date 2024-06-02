@@ -1,5 +1,6 @@
 ﻿using SimpleStepParser.StepFileRepresentation.Domain.Entities;
 using SimpleStepParser.StepFileRepresentation.Domain.Enums;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace SimpleStepParser.StepFileRepresentation.Application.Parser;
@@ -56,6 +57,26 @@ internal static class StepEntityParser
                     result = TryParseToStepNextAssemblyUsageOccurrence(from.Id, from.Body);
                     break;
                 }
+            case StepEntityType.SHAPE_DEFINITION_REPRESENTATION:
+                {
+                    result = TryParseToStepShapeDefinitionRepresentation(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.PRODUCT_DEFINITION:
+                {
+                    result = TryParseToStepProductDefinition(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE:
+                {
+                    result = TryParseToStepProductDefinitionFormationWithSpecifiedSource(from.Id, from.Body);
+                    break;
+                }
+            case StepEntityType.PRODUCT:
+                {
+                    result = TryParseToStepProduct(from.Id, from.Body);
+                    break;
+                }
         }
         return (result != null);
     }
@@ -79,9 +100,9 @@ internal static class StepEntityParser
         StepDirection result = new StepDirection(id)
         {
             Name = match.Groups["name"].Value ?? string.Empty,
-            I = float.Parse(match.Groups["i"].Value),
-            J = float.Parse(match.Groups["j"].Value),
-            K = float.Parse(match.Groups["k"].Value),
+            I = float.Parse(match.Groups["i"].Value, CultureInfo.InvariantCulture),
+            J = float.Parse(match.Groups["j"].Value, CultureInfo.InvariantCulture),
+            K = float.Parse(match.Groups["k"].Value, CultureInfo.InvariantCulture),
         };
 
         return result;
@@ -107,9 +128,9 @@ internal static class StepEntityParser
         StepCartesianPoint result = new StepCartesianPoint(id)
         {
             Name = match.Groups["name"].Value ?? string.Empty,
-            X = float.Parse(match.Groups["x"].Value),
-            Y = float.Parse(match.Groups["y"].Value),
-            Z = float.Parse(match.Groups["z"].Value),
+            X = float.Parse(match.Groups["x"].Value, CultureInfo.InvariantCulture),
+            Y = float.Parse(match.Groups["y"].Value, CultureInfo.InvariantCulture),
+            Z = float.Parse(match.Groups["z"].Value, CultureInfo.InvariantCulture),
         };
 
         return result;
@@ -309,6 +330,124 @@ internal static class StepEntityParser
                 RelatingProductDefinition = int.Parse(match.Groups["relatingProd"].Value),
                 RelatedProductDefinition = int.Parse(match.Groups["relatedProd"].Value),
                 ReferenceDesignator = match.Groups["ref"]?.Value ?? string.Empty
+            };
+        return result;
+    }
+
+
+    private static Regex _stepShapeDefinitionRepresentation
+    = new Regex(@"^\(#(?<def>.*),#(?<rep>\d*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepShapeDefinitionRepresentation?
+        TryParseToStepShapeDefinitionRepresentation(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepShapeDefinitionRepresentation.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepShapeDefinitionRepresentation result
+            = new StepShapeDefinitionRepresentation(id)
+            {
+                Definition = int.Parse(match.Groups["def"].Value),
+                UsedRepresentation = int.Parse(match.Groups["rep"].Value)
+            };
+        return result;
+    }
+
+
+    private static Regex _stepProductDefinition
+    = new Regex(@"^\('(?<iden>.*)','(?<descr>.*)',#(?<formation>\d*),#(?<frOfRef>\d*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepProductDefinition?
+        TryParseToStepProductDefinition(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepProductDefinition.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepProductDefinition result
+            = new StepProductDefinition(id)
+            {
+                Identifier = match.Groups["iden"].Value,
+                Description = match.Groups["descr"].Value,
+                Formation = int.Parse(match.Groups["formation"].Value),
+                FrameOfReference = int.Parse(match.Groups["frOfRef"].Value)
+            };
+        return result;
+    }
+
+
+    private static Regex _stepProductDefinitionFormationWithSpecifiedSource
+    = new Regex(@"^\('(?<iden>.*)','(?<descr>.*)',#(?<ofProduct>\d*),(?<makeOrBuy>.*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepProductDefinitionFormationWithSpecifiedSource?
+        TryParseToStepProductDefinitionFormationWithSpecifiedSource(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepProductDefinitionFormationWithSpecifiedSource.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepProductDefinitionFormationWithSpecifiedSource result
+            = new StepProductDefinitionFormationWithSpecifiedSource(id)
+            {
+                Identifier = match.Groups["iden"].Value,
+                Description = match.Groups["descr"].Value,
+                OfProduct = int.Parse(match.Groups["ofProduct"].Value),
+                MakeOrBuy = match.Groups["makeOrBuy"].Value,
+            };
+        return result;
+    }
+
+
+    private static Regex _stepProduct
+    = new Regex(@"^\('(?<iden>.*)','(?<name>.*)','(?<descr>.*)',(?<frOfRef>.*)\);",
+        RegexOptions.Compiled);
+
+    internal static StepProduct?
+        TryParseToStepProduct(int id, string body)
+    {
+        if (body == null)
+        {
+            return null;
+        }
+
+        var match = _stepProduct.Match(body);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        StepProduct result
+            = new StepProduct(id)
+            {
+                Identifier = match.Groups["iden"].Value,
+                Name = match.Groups["name"].Value,
+                Description = match.Groups["descr"].Value,
+                FrameOfReference = match.Groups["frOfRef"].Value,
             };
         return result;
     }
