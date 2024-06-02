@@ -1,6 +1,7 @@
 ﻿using MathNet.Spatial.Euclidean;
 using SimpleStepParser.SimplifiedModelRepresentation.Domain;
 using SimpleStepParser.StepFileRepresentation.Domain.Entities;
+using SimpleStepParser.StepFileRepresentation.Domain.Exceptions;
 using SimpleStepParser.StepFileRepresentation.Domain.StepRepresentation;
 
 namespace SimpleStepParser.SimplifiedModelRepresentation.Application;
@@ -83,7 +84,7 @@ internal static class ModelInterpretator
         }
         if(modelTypesResult.Count != 1)
         {
-            return new Model();
+            throw new UnableToBuildModelTreeException();
         }
         ModelEntity root = new(0, modelTypesResult[0]);
         return ToModel(root);
@@ -113,7 +114,8 @@ internal static class ModelInterpretator
     {
         ModelType model = new(id);
         //Finding model name
-        model.Name = GetModelNameByProduct(id, stepFileRepresentation);
+        model.Name = SiemensNxModelNameFixer
+            .FixString(GetModelNameByProduct(id, stepFileRepresentation));
 
         return model;
     }

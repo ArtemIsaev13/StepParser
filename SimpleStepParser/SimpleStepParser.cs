@@ -1,5 +1,4 @@
-﻿using SimpleStepParser.PostProcessing.Application;
-using SimpleStepParser.SimplifiedModelRepresentation.Domain;
+﻿using SimpleStepParser.SimplifiedModelRepresentation.Domain;
 using SimpleStepParser.SimplifiedModelRepresentation.Application;
 using SimpleStepParser.StepFileRepresentation.Domain.StepRepresentation;
 using SimpleStepParser.StepFileRepresentation.Application.Parser;

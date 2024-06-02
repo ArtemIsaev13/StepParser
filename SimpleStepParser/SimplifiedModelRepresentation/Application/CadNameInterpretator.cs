@@ -10,6 +10,7 @@ internal static class CadNameInterpretator
         {
             return CadName.Unknown;
         }
+
         if(header.Contains("SOLIDWORKS", StringComparison.InvariantCultureIgnoreCase))
         {
             return CadName.SolidWorks;
@@ -29,6 +30,31 @@ internal static class CadNameInterpretator
         else
         {
             return CadName.Unknown;
+        }
+    }
+
+    public static StepVersion GetStepVersionByHeader(string? header)
+    {
+        if (header == null)
+        {
+            return StepVersion.Unknown;
+        }
+
+        else if (header.Contains("AP203", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return StepVersion.AP203;
+        }
+        else if (header.Contains("AP214", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return StepVersion.AP214;
+        }
+        else if (header.Contains("AP242", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return StepVersion.AP242;
+        }
+        else
+        {
+            return StepVersion.Unknown;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace SimpleStepParser.PostProcessing.Application;
+namespace SimpleStepParser.SimplifiedModelRepresentation.Application;
 
 internal static class SiemensNxModelNameFixer
 {
@@ -20,13 +20,13 @@ internal static class SiemensNxModelNameFixer
 
     private static void FixModelNameRecursive(Model model)
     {
-        if(model == null)
+        if (model == null)
         {
             return;
         }
 
         string newName = FixString(model.Name ?? string.Empty);
-        
+
         model.Name = newName;
 
         foreach (Model child in model.Childs)
@@ -35,15 +35,17 @@ internal static class SiemensNxModelNameFixer
         }
     }
 
-    private static Regex _ackiiRegionRegex = new Regex(@"(?<ascii>\\X2\\[0-9A-F]*\\X0\\)", RegexOptions.Compiled);
-    private static Regex _ackiiRegionRegex2 = new Regex("(?<ascii>_X2_[0-9A-F]*_X0_)", RegexOptions.Compiled);
-    private static Regex _ackiiRegionRegex3 = new Regex("(?<ascii>_X2_[0-9A-F]*_)", RegexOptions.Compiled);
+    private static Regex _ackiiRegionRegex = new Regex(@"(?<ascii>\\X2\\[0-9A-Fa-f]*\\X0\\)", RegexOptions.Compiled);
+    private static Regex _ackiiRegionRegex2 = new Regex("(?<ascii>_X2_[0-9A-Fa-f]*_X0_)", RegexOptions.Compiled);
+    private static Regex _ackiiRegionRegex3 = new Regex("(?<ascii>_X2_[0-9A-Fa-f]*_)", RegexOptions.Compiled);
+    private static Regex _ackiiRegionRegex4 = new Regex(@"(?<ascii>\\\\X2\\\\[0-9A-Fa-f]*\\\\X0\\\\)", RegexOptions.Compiled);
+
     public static string FixString(string name)
     {
         string result = name.Replace(Environment.NewLine, "");
 
         //Fixing expressions like /X2/123412341234/X0/
-        MatchCollection matches = _ackiiRegionRegex.Matches(name);
+        MatchCollection matches = _ackiiRegionRegex.Matches(result);
         if (matches.Count > 0)
         {
             foreach (Match? match in matches.ToList())
@@ -56,7 +58,7 @@ internal static class SiemensNxModelNameFixer
         }
 
         //Fixing expressions like _X2_123412341234_X0_
-        matches = _ackiiRegionRegex2.Matches(name);
+        matches = _ackiiRegionRegex2.Matches(result);
         if (matches.Count > 0)
         {
             foreach (Match? match in matches.ToList())
@@ -69,13 +71,26 @@ internal static class SiemensNxModelNameFixer
         }
 
         //Fixing expressions like _X2_123412341234_
-        matches = _ackiiRegionRegex3.Matches(name);
+        matches = _ackiiRegionRegex3.Matches(result);
         if (matches.Count > 0)
         {
             foreach (Match? match in matches.ToList())
             {
                 string asciiString =
                     match.Value.Substring(4, match.Value.Length - 5);
+                string fixedString = AsciiToString(asciiString);
+                result = result.Replace(match.Value, fixedString);
+            }
+        }
+
+        //Fixing expressions like //X2//123412341234//X0//
+        matches = _ackiiRegionRegex3.Matches(result);
+        if (matches.Count > 0)
+        {
+            foreach (Match? match in matches.ToList())
+            {
+                string asciiString =
+                    match.Value.Substring(6, match.Value.Length - 12);
                 string fixedString = AsciiToString(asciiString);
                 result = result.Replace(match.Value, fixedString);
             }
@@ -92,7 +107,7 @@ internal static class SiemensNxModelNameFixer
         {
             string asciiNumberString = ascii.Substring(i * 4, 4);
             int askiiNumber = 0;
-            if (Int32.TryParse(asciiNumberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out askiiNumber))
+            if (int.TryParse(asciiNumberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out askiiNumber))
             {
                 result.Append((char)askiiNumber);
             }
