@@ -8,7 +8,7 @@ namespace SimpleStepParser.SimplifiedModelRepresentation.Application;
 
 internal static class ModelInterpretator
 {
-    internal static Model? GetModelTree(StepRepresentation stepFileRepresentation)
+    internal static Model? GetModelTree(StepRepresentation stepFileRepresentation, StepVersion stepVersion, CadName cadName)
     {
         if(stepFileRepresentation == null)
         {
@@ -28,29 +28,42 @@ internal static class ModelInterpretator
                 continue;
             }
 
+            //TODO: Solve this great mistery
+            int localParentId = relationship.ParentId;
+            if(cadName == CadName.SolidWorks && stepVersion == StepVersion.AP214)
+            {
+                localParentId = relationship.ChildId;
+            }
+
+            int localChildId = relationship.ChildId;
+            if (cadName == CadName.SolidWorks && stepVersion == StepVersion.AP214)
+            {
+                localChildId = relationship.ParentId;
+            }
+
             //Creating model type for parent if necessary 
             ModelType parentModelType = null;
 
-            if(modelTypes.Exists(mt => mt.Id == relationship.ParentId))
+            if(modelTypes.Exists(mt => mt.Id == localParentId))
             {
-                parentModelType = modelTypes.First(mt => mt.Id == relationship.ParentId);
+                parentModelType = modelTypes.First(mt => mt.Id == localParentId);
             }
             else
             {
-                parentModelType = GetModelType(relationship.ParentId, stepFileRepresentation);
+                parentModelType = GetModelType(localParentId, stepFileRepresentation);
                 modelTypes.Add(parentModelType);
             }
 
             //Creating model type for child if necessary 
             ModelType childModelType = null;
 
-            if (modelTypes.Exists(mt => mt.Id == relationship.ChildId))
+            if (modelTypes.Exists(mt => mt.Id == localChildId))
             {
-                childModelType = modelTypes.First(mt => mt.Id == relationship.ChildId);
+                childModelType = modelTypes.First(mt => mt.Id == localChildId);
             }
             else
             {
-                childModelType = GetModelType(relationship.ChildId, stepFileRepresentation);
+                childModelType = GetModelType(localChildId, stepFileRepresentation);
                 modelTypes.Add(childModelType);
             }
 

@@ -18,10 +18,9 @@ namespace SimpleStepParser
             StepRepresentation representation
                 = StepRepresentationParser.GetStepRepresentation(fullStepFile);
 
-            Model? resultRoot = ModelInterpretator.GetModelTree(representation);
             CadName resultCadName = CadNameInterpretator.GetCadNameByHeader(representation.Header);
-
-            resultRoot = SiemensNxModelNameFixer.FixName(resultRoot);
+            StepVersion resultStepVersion = CadNameInterpretator.GetStepVersionByHeader(representation.Header);
+            Model? resultRoot = ModelInterpretator.GetModelTree(representation, resultStepVersion, resultCadName);
 
             Assembly? result = new Assembly()
             {
