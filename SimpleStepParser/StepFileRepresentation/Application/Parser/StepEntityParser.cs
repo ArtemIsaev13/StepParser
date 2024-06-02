@@ -1,5 +1,6 @@
 ﻿using SimpleStepParser.StepFileRepresentation.Domain.Entities;
 using SimpleStepParser.StepFileRepresentation.Domain.Enums;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace SimpleStepParser.StepFileRepresentation.Application.Parser;
@@ -99,9 +100,9 @@ internal static class StepEntityParser
         StepDirection result = new StepDirection(id)
         {
             Name = match.Groups["name"].Value ?? string.Empty,
-            I = float.Parse(match.Groups["i"].Value),
-            J = float.Parse(match.Groups["j"].Value),
-            K = float.Parse(match.Groups["k"].Value),
+            I = float.Parse(match.Groups["i"].Value, CultureInfo.InvariantCulture),
+            J = float.Parse(match.Groups["j"].Value, CultureInfo.InvariantCulture),
+            K = float.Parse(match.Groups["k"].Value, CultureInfo.InvariantCulture),
         };
 
         return result;
@@ -127,9 +128,9 @@ internal static class StepEntityParser
         StepCartesianPoint result = new StepCartesianPoint(id)
         {
             Name = match.Groups["name"].Value ?? string.Empty,
-            X = float.Parse(match.Groups["x"].Value),
-            Y = float.Parse(match.Groups["y"].Value),
-            Z = float.Parse(match.Groups["z"].Value),
+            X = float.Parse(match.Groups["x"].Value, CultureInfo.InvariantCulture),
+            Y = float.Parse(match.Groups["y"].Value, CultureInfo.InvariantCulture),
+            Z = float.Parse(match.Groups["z"].Value, CultureInfo.InvariantCulture),
         };
 
         return result;

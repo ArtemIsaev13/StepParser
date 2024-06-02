@@ -109,7 +109,6 @@ internal static class StepRepresentationParser
             {
                 case "CARTESIAN_POINT":
                     {
-                        //TODO: double type identification
                         stepRepresentation.StepCartesianPoints!.AddEntity(
                                 new UninitializedStepEntity(
                                     id, 
