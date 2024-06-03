@@ -17,7 +17,9 @@ public class Model
         result.CoordinateSystem = CoordinateSystem;
         foreach (var child in Childs)
         {
-            result.Childs.Add(child.GetDeepCopy());
+            Model newChild = child.GetDeepCopy();
+            newChild.Parent = result;
+            result.Childs.Add(newChild);
         }
         return result;
     }

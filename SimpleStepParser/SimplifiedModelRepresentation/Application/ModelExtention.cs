@@ -1,5 +1,6 @@
 ﻿using MathNet.Spatial.Euclidean;
 using SimpleStepParser.SimplifiedModelRepresentation.Domain;
+using SimpleStepParser.StepFileRepresentation.Domain.Exceptions;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -14,7 +15,7 @@ public static class ModelExtention
     /// <returns></returns>
     public static CoordinateSystem? GetTransformationTo(this Model model, Model child)
     {
-        if(model?.CoordinateSystem == null || child?.CoordinateSystem == null)
+        if(child?.CoordinateSystem == null)
         {
             return null;
         }
@@ -30,7 +31,7 @@ public static class ModelExtention
         {
             if(current.Parent == null)
             {
-                throw new ArgumentException("This model isn't child.");
+                throw new UnableToFindPathFromModelToChildException();
             }
             if(current.Parent == model)
             {
