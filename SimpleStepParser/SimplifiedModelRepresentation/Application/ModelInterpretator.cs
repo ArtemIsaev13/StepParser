@@ -8,43 +8,49 @@ namespace SimpleStepParser.SimplifiedModelRepresentation.Application;
 
 internal static class ModelInterpretator
 {
-    internal static Model? GetModelTree(StepRepresentation stepFileRepresentation, StepVersion stepVersion, CadName cadName)
+    internal static Model? GetModelTree(StepRepresentation stepFileRepresentation)
     {
         if(stepFileRepresentation == null)
         {
             return null;
         }
 
-        List<ModelType> modelTypes = new ();
-        List<ModelEntity> modelEntities = new ();
+        Model? result = GetModelTree(stepFileRepresentation, false);
+        if(result is null)
+        {
+            result = GetModelTree(stepFileRepresentation, true);
+        }
 
-        List<StepRepresentationRelationshipWithTransformation> relationships 
+        if(result is null)
+        {
+            throw new UnableToBuildModelTreeException();
+        }
+
+        return result;
+    }
+
+    private static Model? GetModelTree(StepRepresentation stepFileRepresentation, bool isRep2IsParent)
+    {
+        List<ModelType> modelTypes = new();
+        List<ModelEntity> modelEntities = new();
+
+        List<StepRepresentationRelationshipWithTransformation> relationships
             = stepFileRepresentation.StepRepresentationsRelationshipWithTransformation.GetAll();
 
         foreach (var relationship in relationships)
         {
-            if(relationship == null)
+            if (relationship == null)
             {
                 continue;
             }
 
-            //TODO: Solve this great mistery
-            int localParentId = relationship.ParentId;
-            if(cadName == CadName.SolidWorks && stepVersion == StepVersion.AP214)
-            {
-                localParentId = relationship.ChildId;
-            }
-
-            int localChildId = relationship.ChildId;
-            if (cadName == CadName.SolidWorks && stepVersion == StepVersion.AP214)
-            {
-                localChildId = relationship.ParentId;
-            }
+            int localParentId = isRep2IsParent ? relationship.Rep2Id : relationship.Rep1Id;
+            int localChildId = isRep2IsParent ? relationship.Rep1Id : relationship.Rep2Id;
 
             //Creating model type for parent if necessary 
-            ModelType parentModelType = null;
+            ModelType? parentModelType = null;
 
-            if(modelTypes.Exists(mt => mt.Id == localParentId))
+            if (modelTypes.Exists(mt => mt.Id == localParentId))
             {
                 parentModelType = modelTypes.First(mt => mt.Id == localParentId);
             }
@@ -55,7 +61,7 @@ internal static class ModelInterpretator
             }
 
             //Creating model type for child if necessary 
-            ModelType childModelType = null;
+            ModelType? childModelType = null;
 
             if (modelTypes.Exists(mt => mt.Id == localChildId))
             {
@@ -77,12 +83,12 @@ internal static class ModelInterpretator
         }
 
         //Root it is parentless model
-        Model? result = ToModelRoot(modelTypes, modelEntities);
+        Model? result = ToModelRoot(modelTypes);
 
         return result;
     }
 
-    private static Model ToModelRoot(List<ModelType> modelTypes, List<ModelEntity> modelEntities)
+    private static Model? ToModelRoot(List<ModelType> modelTypes)
     {
         List<ModelType> modelTypesResult = modelTypes.ToList();
         foreach(var modelType in modelTypes)
@@ -97,7 +103,7 @@ internal static class ModelInterpretator
         }
         if(modelTypesResult.Count != 1)
         {
-            throw new UnableToBuildModelTreeException();
+            return null;
         }
         ModelEntity root = new(0, modelTypesResult[0]);
         return ToModel(root);
@@ -138,7 +144,7 @@ internal static class ModelInterpretator
         List<StepShapeDefinitionRepresentation> allShapeRepresentation 
             = stepRepresentation.StepShapeDefinitionRepresentations.GetAll();
         if(!allShapeRepresentation
-            .Any(sr => sr.UsedRepresentation == shapeRepresentationId))
+            .Exists(sr => sr.UsedRepresentation == shapeRepresentationId))
         {
             return string.Empty;
         }

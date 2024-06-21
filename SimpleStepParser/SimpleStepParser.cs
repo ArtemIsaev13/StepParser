@@ -20,12 +20,13 @@ namespace SimpleStepParser
 
             CadName resultCadName = CadNameInterpretator.GetCadNameByHeader(representation.Header);
             StepVersion resultStepVersion = CadNameInterpretator.GetStepVersionByHeader(representation.Header);
-            Model? resultRoot = ModelInterpretator.GetModelTree(representation, resultStepVersion, resultCadName);
+            Model? resultRoot = ModelInterpretator.GetModelTree(representation);
 
-            Assembly? result = new Assembly()
+            Assembly? result = new()
             {
                 Root = resultRoot,
-                CadName = resultCadName
+                CadName = resultCadName,
+                StepVersion = resultStepVersion
             };
 
             return result;
