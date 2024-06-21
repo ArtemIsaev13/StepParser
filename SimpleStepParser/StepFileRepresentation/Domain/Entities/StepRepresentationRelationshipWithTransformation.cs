@@ -12,7 +12,7 @@ internal class StepRepresentationRelationshipWithTransformation : AbstractStepEn
 
     public string? Name { get; init; }
     public string? Description { get; init; }
-    public int ParentId { get; init; }
-    public int ChildId { get; init; }
+    public int Rep1Id { get; init; }
+    public int Rep2Id { get; init; }
     public int TransformationId { get; init; }
 }

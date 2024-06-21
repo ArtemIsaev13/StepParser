@@ -242,8 +242,8 @@ internal static class StepEntityParser
             {
                 Name = match.Groups["name"].Value ?? string.Empty,
                 Description = match.Groups["description"].Value ?? string.Empty,
-                ChildId = int.Parse(match.Groups["child"].Value),
-                ParentId = int.Parse(match.Groups["parent"].Value),
+                Rep2Id = int.Parse(match.Groups["child"].Value),
+                Rep1Id = int.Parse(match.Groups["parent"].Value),
                 TransformationId = int.Parse(match.Groups["transformation"].Value)
             };
         return result;
